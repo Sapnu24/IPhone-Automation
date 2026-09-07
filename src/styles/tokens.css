@@ -1,0 +1,157 @@
+/* Design tokens — an iOS-flavoured, calm "fintech" system with light + dark.
+   Light is the default (:root). Dark applies when the system prefers dark and
+   the user hasn't overridden, or when [data-theme="dark"] is set explicitly. */
+
+:root {
+  /* Surfaces */
+  --bg: #eef1f6;
+  --bg-elev: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f6fb;
+  --surface-3: #eaeef6;
+  --border: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.16);
+
+  /* Text */
+  --text: #0b1220;
+  --text-2: #46536b;
+  --text-3: #8793a8;
+
+  /* Brand + semantic */
+  --primary: #3f6dff;
+  --primary-2: #6a97ff;
+  --primary-ink: #ffffff;
+  --primary-soft: rgba(63, 109, 255, 0.12);
+  --success: #12a15f;
+  --success-soft: rgba(18, 161, 95, 0.12);
+  --warning: #c07a00;
+  --warning-soft: rgba(214, 158, 46, 0.16);
+  --danger: #e23d4f;
+  --danger-soft: rgba(226, 61, 79, 0.12);
+
+  /* Category accent palette (used by pills, dots, charts) */
+  --c-housing: #3f6dff;
+  --c-food: #12a15f;
+  --c-transport: #d98a00;
+  --c-utilities: #7c5cff;
+  --c-fun: #e23d8f;
+  --c-health: #0ea5a5;
+  --c-shopping: #e2703d;
+  --c-subs: #8b5cf6;
+  --c-income: #12a15f;
+  --c-other: #64748b;
+
+  /* Shape + depth */
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-2: 0 6px 20px rgba(15, 23, 42, 0.1);
+  --shadow-pop: 0 12px 40px rgba(15, 23, 42, 0.22);
+
+  /* Spacing rhythm */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+
+  /* Layout */
+  --tabbar-h: 60px;
+  --maxw: 520px;
+
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+
+  color-scheme: light;
+}
+
+/* Dark palette (shared by system-dark and explicit dark) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b1220;
+    --bg-elev: #111b31;
+    --surface: #15203a;
+    --surface-2: #1b2947;
+    --surface-3: #223154;
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    --text: #f2f5fb;
+    --text-2: #b3bfd6;
+    --text-3: #7f8ca8;
+
+    --primary: #5b8cff;
+    --primary-2: #86a9ff;
+    --primary-ink: #071021;
+    --primary-soft: rgba(91, 140, 255, 0.18);
+    --success: #34d399;
+    --success-soft: rgba(52, 211, 153, 0.16);
+    --warning: #fbbf24;
+    --warning-soft: rgba(251, 191, 36, 0.18);
+    --danger: #fb7185;
+    --danger-soft: rgba(251, 113, 133, 0.18);
+
+    --c-housing: #5b8cff;
+    --c-food: #34d399;
+    --c-transport: #fbbf24;
+    --c-utilities: #a78bfa;
+    --c-fun: #f472b6;
+    --c-health: #2dd4bf;
+    --c-shopping: #fb923c;
+    --c-subs: #c084fc;
+    --c-income: #34d399;
+    --c-other: #94a3b8;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 8px 26px rgba(0, 0, 0, 0.5);
+    --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.6);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b1220;
+  --bg-elev: #111b31;
+  --surface: #15203a;
+  --surface-2: #1b2947;
+  --surface-3: #223154;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #f2f5fb;
+  --text-2: #b3bfd6;
+  --text-3: #7f8ca8;
+
+  --primary: #5b8cff;
+  --primary-2: #86a9ff;
+  --primary-ink: #071021;
+  --primary-soft: rgba(91, 140, 255, 0.18);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.16);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.18);
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.18);
+
+  --c-housing: #5b8cff;
+  --c-food: #34d399;
+  --c-transport: #fbbf24;
+  --c-utilities: #a78bfa;
+  --c-fun: #f472b6;
+  --c-health: #2dd4bf;
+  --c-shopping: #fb923c;
+  --c-subs: #c084fc;
+  --c-income: #34d399;
+  --c-other: #94a3b8;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 26px rgba(0, 0, 0, 0.5);
+  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
+}
