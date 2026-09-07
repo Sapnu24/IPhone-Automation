@@ -65,6 +65,21 @@ const SEED = `(${async () => {
   await put('budgets', { id: 'bud2', categoryId: 'cat-fun', monthlyLimit: 150 })
   await put('budgets', { id: 'bud3', categoryId: 'cat-transport', monthlyLimit: 120 })
   await put('budgets', { id: 'bud4', categoryId: 'cat-shopping', monthlyLimit: 200 })
+  const dt = (offDays, hour) => {
+    const x = new Date()
+    x.setDate(x.getDate() + offDays)
+    x.setHours(hour, 0, 0, 0)
+    return x.getTime()
+  }
+  const fs = (id, offDays, hour, min) =>
+    put('focusSessions', { id, startedAt: dt(offDays, hour), endedAt: dt(offDays, hour) + min * 60000, durationMin: min, type: 'work', taskLabel: 'Deep work', completed: true })
+  await fs('f1', 0, 9, 25); await fs('f2', 0, 10, 25); await fs('f3', 0, 14, 25)
+  await fs('f4', -1, 9, 25); await fs('f5', -1, 11, 25)
+  await fs('f6', -2, 15, 25)
+  await fs('f7', -3, 10, 25); await fs('f8', -3, 16, 25)
+  await fs('f9', -5, 9, 25); await fs('f10', -6, 20, 25)
+  await put('usageLogs', { id: 'u1', date: d(0), label: 'Instagram', minutes: 45, createdAt: now })
+  await put('usageLogs', { id: 'u2', date: d(0), label: 'YouTube', minutes: 30, createdAt: now })
 }})()`
 
 const browser = await launch()
@@ -102,13 +117,22 @@ await shot('03-money-bills')
 await page.getByRole('tab', { name: 'Budgets' }).click()
 await shot('04-money-budgets')
 
+await page.getByRole('link', { name: 'Focus' }).click()
+await shot('05-focus')
+
+await page.getByRole('link', { name: 'Insights' }).click()
+await shot('06-insights')
+await page.screenshot({ path: `${outDir}/07-insights-full.png`, fullPage: true })
+
 await page.getByRole('link', { name: 'Settings' }).click()
-await shot('05-settings')
+await shot('08-settings')
 
 // Dark mode
 await page.getByRole('tab', { name: 'Dark' }).click()
 await page.getByRole('link', { name: 'Home' }).click()
-await shot('06-home-dark')
+await shot('09-home-dark')
+await page.getByRole('link', { name: 'Insights' }).click()
+await shot('10-insights-dark')
 
 console.log('PAGE ERRORS:', errors.length ? errors : 'none')
 await browser.close()

@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../store'
 import Sheet from '../../components/Sheet'
 import { ScreenHeader } from '../../components/ui'
-import { IconBell, IconCheck, IconChevron, IconPlus } from '../../components/Icons'
+import { IconBell, IconCheck, IconChevron, IconPlus, IconTimer } from '../../components/Icons'
 import TransactionForm from '../money/TransactionForm'
 import BillForm from '../money/BillForm'
 import { cashflow, currentMonthKey, monthTotals, outstandingBills } from '../../lib/money'
-import { formatDate, formatMoney, humanDue } from '../../lib/format'
+import { formatDate, formatMoney, humanDue, toISODate, todayISO } from '../../lib/format'
 
 function greeting(d = new Date()): string {
   const h = d.getHours()
@@ -29,6 +29,9 @@ export default function HomeScreen() {
   const totals = monthTotals(app.transactions, month)
   const totalBudget = app.budgets.reduce((s, b) => s + b.monthlyLimit, 0)
   const dueSoon = outstandingBills(app.bills, app.occurrences, now).filter((d) => d.daysUntil <= 14)
+  const focusToday = app.focusSessions.filter(
+    (s) => s.completed && toISODate(new Date(s.startedAt)) === todayISO(),
+  ).length
 
   const empty = app.transactions.length === 0 && app.bills.length === 0
 
@@ -158,6 +161,29 @@ export default function HomeScreen() {
               </span>
             </div>
           </div>
+
+          {/* Focus teaser */}
+          <div className="section-label">Focus</div>
+          <button
+            className="card card--pad row row--between"
+            onClick={() => nav('/focus')}
+            style={{ width: '100%', textAlign: 'left', border: '1px solid var(--border)' }}
+          >
+            <div className="row" style={{ gap: 12 }}>
+              <div className="avatar" style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
+                <IconTimer size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700 }}>
+                  {focusToday > 0 ? `${focusToday} focus session${focusToday > 1 ? 's' : ''} today` : 'Start a focus session'}
+                </div>
+                <div className="muted" style={{ fontSize: 12 }}>
+                  Pomodoro timer for work &amp; study
+                </div>
+              </div>
+            </div>
+            <IconChevron size={18} />
+          </button>
 
           {/* Quick actions */}
           <div className="row" style={{ gap: 12, marginTop: 16 }}>
