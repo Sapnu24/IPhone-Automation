@@ -77,6 +77,32 @@ function resolveCategory(text: string, ctx: Ctx): string {
 
 const SUBSCRIPTION_RE = /\b(subscription|subscribe(d)?|sub to|renew(al)?)\b/i
 
+// Recognised digital subscription services — auto-detected even without the
+// word "subscription". Telco (Globe/Smart/Converge/PLDT) is intentionally
+// excluded here since "globe 100" is usually a one-off load, not a plan.
+const AUTO_SUB: { kw: string; name: string; icon: string }[] = [
+  { kw: 'netflix', name: 'Netflix', icon: '🎬' },
+  { kw: 'spotify', name: 'Spotify', icon: '🎵' },
+  { kw: 'youtube', name: 'YouTube Premium', icon: '▶️' },
+  { kw: 'hbo', name: 'HBO Max', icon: '📺' },
+  { kw: 'disney', name: 'Disney+', icon: '🏰' },
+  { kw: 'prime video', name: 'Prime Video', icon: '📦' },
+  { kw: 'canva', name: 'Canva', icon: '🎨' },
+  { kw: 'claude', name: 'Claude', icon: '🤖' },
+  { kw: 'chatgpt', name: 'ChatGPT Plus', icon: '💬' },
+  { kw: 'icloud', name: 'Apple iCloud+', icon: '☁️' },
+  { kw: 'apple music', name: 'Apple Music', icon: '🎧' },
+  { kw: 'microsoft 365', name: 'Microsoft 365', icon: '🪟' },
+  { kw: 'office 365', name: 'Microsoft 365', icon: '🪟' },
+  { kw: 'google one', name: 'Google One', icon: '🔷' },
+  { kw: 'iqiyi', name: 'iQIYI', icon: '🎞️' },
+  { kw: 'viu', name: 'Viu', icon: '📱' },
+]
+
+function matchSubService(lower: string): { name: string; icon: string } | undefined {
+  return AUTO_SUB.find((s) => new RegExp(`\\b${s.kw}\\b`, 'i').test(lower))
+}
+
 // Filler words to drop so the note is just the merchant/item.
 const FILLER_RE =
   /\b(i|ive|have|has|had|a|an|the|my|me|this|that|of|is|are|am|on|for|from|at|to|in|with|and|sa|kay|ng|na|po|ako|ko|si|meron|may|mga|spent|spend|spending|paid|pay|pays|bought|buy|buying|purchase[d]?|got|nag|nagbayad|bumili|subscription|subscribe[d]?|sub|renew|renewal|renewed|monthly|month|per|every|php|peso[s]?|piso[s]?)\b/gi
@@ -158,24 +184,27 @@ function classify(line: string, ctx: Ctx): LineResult {
   const amt = parseAmount(lower)
   if (amt != null) {
     const acct = findAccount(lower, ctx)
+    const income = INCOME_WORDS.some((w) => lower.includes(w)) || /^\+/.test(line.trim())
+    const merchant = noteFrom(line, acct?.name)
+    const known = income ? undefined : matchSubService(lower)
 
-    // Subscription: "subscription on canva 480" → a recurring Subscriptions entry.
-    if (SUBSCRIPTION_RE.test(lower)) {
-      const name = noteFrom(line, acct?.name) ?? 'Subscription'
+    // Subscription: an explicit word ("subscription on canva 480") OR a
+    // recognised service ("netflix 549").
+    if (!income && (SUBSCRIPTION_RE.test(lower) || known)) {
+      const name = known?.name ?? merchant ?? 'Subscription'
+      const icon = known?.icon ?? presetIcon(name)
       const catId = ctx.categories.some((c) => c.id === 'cat-subs')
         ? 'cat-subs'
         : resolveCategory(lower, ctx)
-      return { action: { type: 'subscription', amount: amt, name, icon: presetIcon(name), categoryId: catId } }
+      return { action: { type: 'subscription', amount: amt, name, icon, categoryId: catId } }
     }
 
-    const income = INCOME_WORDS.some((w) => lower.includes(w)) || /^\+/.test(line.trim())
     const accountId = acct?.id ?? ctx.defaultAccountId
-    const note = noteFrom(line, acct?.name)
     if (income) {
       const incCat = ctx.categories.find((c) => c.kind === 'income')?.id ?? 'cat-income'
-      return { action: { type: 'income', amount: amt, categoryId: incCat, accountId, note } }
+      return { action: { type: 'income', amount: amt, categoryId: incCat, accountId, note: merchant } }
     }
-    return { action: { type: 'expense', amount: amt, categoryId: resolveCategory(lower, ctx), accountId, note } }
+    return { action: { type: 'expense', amount: amt, categoryId: resolveCategory(lower, ctx), accountId, note: merchant } }
   }
 
   return { unknown: line }

@@ -89,6 +89,13 @@ export default function ChatPanel({ onClose }: { onClose?: () => void }) {
           const tr = await app.addTransfer({ fromAccountId: a.fromAccountId, toAccountId: a.toAccountId, amount: a.amount, date: todayISO() })
           transferIds.push(tr.id)
         } else if (a.type === 'subscription') {
+          const dupe = app.bills.find(
+            (x) => !x.archived && x.categoryId === 'cat-subs' && x.name.toLowerCase() === a.name.toLowerCase(),
+          )
+          if (dupe) {
+            items.push({ label: `Already tracking ${a.name} — see Subscriptions` })
+            continue
+          }
           const b = await app.addBill({
             name: a.name,
             icon: a.icon,

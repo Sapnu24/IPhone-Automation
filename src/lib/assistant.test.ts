@@ -49,6 +49,18 @@ describe('interpret — clean notes & subscriptions', () => {
     const [x] = actions(interpret('subscribed to netflix 549', ctx))
     expect(x).toMatchObject({ type: 'subscription', amount: 549, name: 'Netflix', categoryId: 'cat-subs' })
   })
+  it('auto-detects a known service without the word "subscription"', () => {
+    const [x] = actions(interpret('netflix 549', ctx))
+    expect(x).toMatchObject({ type: 'subscription', amount: 549, name: 'Netflix', icon: '🎬' })
+  })
+  it('does NOT auto-subscribe telco / ambiguous merchants', () => {
+    const [x] = actions(interpret('globe 300 load', ctx))
+    expect(x.type).toBe('expense')
+  })
+  it('keeps income out of subscription detection', () => {
+    const [x] = actions(interpret('got 15000 salary', ctx))
+    expect(x.type).toBe('income')
+  })
 })
 
 describe('interpret — income, transfer, natural phrasing', () => {
