@@ -4,6 +4,7 @@ import { IconChevron } from '../../components/Icons'
 
 const ACTIVE: { label: string; sub: string; icon: string; to: string }[] = [
   { label: 'Plan', sub: 'Payday, income & payments due', icon: '📅', to: '/plan' },
+  { label: 'Subscriptions', sub: 'Netflix, Spotify & monthly memberships', icon: '🔁', to: '/subscriptions' },
   { label: 'Insights', sub: 'Charts, trends & breakdowns', icon: '📊', to: '/insights' },
   { label: 'Rewards', sub: 'Streaks & badges', icon: '🔥', to: '/rewards' },
   { label: 'Debt', sub: 'Track what you owe', icon: '💳', to: '/debt' },

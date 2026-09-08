@@ -6,20 +6,26 @@ import { SUBSCRIPTION_PRESETS, type Bill, type Recurrence, type SubscriptionPres
 
 interface Props {
   initial?: Bill
+  defaultCategoryId?: string
   onDone: () => void
 }
 
 const REMINDER_OPTIONS = [0, 1, 2, 3, 5, 7]
 
-export default function BillForm({ initial, onDone }: Props) {
+export default function BillForm({ initial, defaultCategoryId, onDone }: Props) {
   const app = useApp()
   const expenseCats = app.categories.filter((c) => c.kind === 'expense' && !c.archived)
+  const hasCat = (id?: string) => !!id && expenseCats.some((c) => c.id === id)
 
   const [name, setName] = useState(initial?.name ?? '')
   const [icon, setIcon] = useState(initial?.icon ?? '')
   const [amount, setAmount] = useState(initial ? String(initial.amount) : '')
   const [categoryId, setCategoryId] = useState(
-    initial?.categoryId ?? expenseCats.find((c) => c.id === 'cat-utilities')?.id ?? expenseCats[0]?.id ?? '',
+    initial?.categoryId ??
+      (hasCat(defaultCategoryId) ? defaultCategoryId! : undefined) ??
+      expenseCats.find((c) => c.id === 'cat-utilities')?.id ??
+      expenseCats[0]?.id ??
+      '',
   )
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? todayISO())
   const [recurrence, setRecurrence] = useState<Recurrence>(initial?.recurrence ?? 'monthly')
