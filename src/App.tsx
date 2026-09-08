@@ -1,6 +1,8 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { AppProvider, useApp } from './store'
 import TabBar from './components/TabBar'
+import ChatFab from './components/ChatFab'
+import { Bee } from './components/Mascot'
 import HomeScreen from './features/home/HomeScreen'
 import WalletScreen from './features/wallet/WalletScreen'
 import MoneyScreen from './features/money/MoneyScreen'
@@ -19,9 +21,9 @@ import SettingsScreen from './features/settings/SettingsScreen'
 function Splash() {
   return (
     <div className="screen" style={{ display: 'grid', placeItems: 'center', minHeight: '70vh' }}>
-      <div style={{ textAlign: 'center', opacity: 0.7 }}>
-        <div style={{ fontSize: 44 }}>⚓️</div>
-        <div style={{ fontWeight: 800, marginTop: 8 }}>Anchor</div>
+      <div style={{ textAlign: 'center', opacity: 0.85 }}>
+        <Bee size={72} />
+        <div style={{ fontWeight: 800, marginTop: 8 }}>Hive</div>
       </div>
     </div>
   )
@@ -52,6 +54,7 @@ function Shell() {
           <Route path="/settings" element={<SettingsScreen />} />
         </Routes>
       )}
+      {!loading && <ChatFab />}
       {!loading && <TabBar />}
     </div>
   )
