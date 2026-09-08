@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ui'
-import { IconChart, IconChevron, IconGear } from '../../components/Icons'
+import { IconChevron } from '../../components/Icons'
 
 const ACTIVE: { label: string; sub: string; icon: string; to: string }[] = [
+  { label: 'Chat with Buzz', sub: 'Log money or ask, in plain language', icon: '💬', to: '/chat' },
   { label: 'Insights', sub: 'Charts, trends & breakdowns', icon: '📊', to: '/insights' },
   { label: 'Settings', sub: 'Currency, theme, backup, data', icon: '⚙️', to: '/settings' },
 ]
@@ -35,7 +36,6 @@ export default function MoreScreen() {
               </div>
             </div>
             <span className="muted">
-              {it.label === 'Insights' ? <IconChart size={18} /> : <IconGear size={18} />}
               <IconChevron size={16} />
             </span>
           </button>

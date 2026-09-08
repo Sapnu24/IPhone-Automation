@@ -124,6 +124,13 @@ export const IconDownload = ({ size, className }: P) => (
   </svg>
 )
 
+export const IconChat = ({ size, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 3v-3H6a2 2 0 0 1-2-2Z" />
+    <path d="M8 9.5h8M8 13h5" />
+  </svg>
+)
+
 export const IconReceipt = ({ size, className }: P) => (
   <svg {...base(size)} className={className}>
     <path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" />

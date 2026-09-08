@@ -10,9 +10,9 @@ import {
   IconBell,
   IconCamera,
   IconChart,
+  IconChat,
   IconCheck,
   IconChevron,
-  IconDownload,
   IconGear,
   IconPlus,
   IconTimer,
@@ -28,7 +28,6 @@ import {
   outstandingBills,
 } from '../../lib/money'
 import { daysUntil, formatMoney, humanDue, formatDate, toISODate, todayISO } from '../../lib/format'
-import { exportBackup } from '../../lib/backup'
 
 type Range = 'day' | 'week' | 'month'
 
@@ -176,8 +175,8 @@ export default function HomeScreen() {
               <QuickAction label="Scan" color="var(--c-transport)" onClick={() => setTxnOpen(true)}>
                 <IconCamera size={22} />
               </QuickAction>
-              <QuickAction label="Backup" color="var(--c-shopping)" onClick={() => void exportBackup()}>
-                <IconDownload size={22} />
+              <QuickAction label="Chat" color="var(--c-shopping)" onClick={() => nav('/chat')}>
+                <IconChat size={22} />
               </QuickAction>
               <QuickAction label="Settings" color="var(--c-other)" onClick={() => nav('/settings')}>
                 <IconGear size={22} />
