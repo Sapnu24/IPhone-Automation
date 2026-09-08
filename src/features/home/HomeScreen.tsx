@@ -28,6 +28,7 @@ import {
   outstandingBills,
 } from '../../lib/money'
 import { paydayInfo } from '../../lib/plan'
+import { activityDays, currentStreak } from '../../lib/streak'
 import { daysUntil, formatMoney, humanDue, formatDate, toISODate, todayISO } from '../../lib/format'
 
 type Range = 'day' | 'week' | 'month'
@@ -37,17 +38,6 @@ function greeting(d = new Date()): string {
   if (h < 12) return 'Good morning'
   if (h < 18) return 'Good afternoon'
   return 'Good evening'
-}
-
-function loggingStreak(days: Set<string>, today: Date): number {
-  const d = new Date(today)
-  if (!days.has(toISODate(d))) d.setDate(d.getDate() - 1) // today not logged yet is OK
-  let streak = 0
-  while (days.has(toISODate(d))) {
-    streak++
-    d.setDate(d.getDate() - 1)
-  }
-  return streak
 }
 
 export default function HomeScreen() {
@@ -65,14 +55,11 @@ export default function HomeScreen() {
     (s) => s.completed && toISODate(new Date(s.startedAt)) === todayISO(),
   ).length
 
-  const streak = useMemo(() => {
-    const days = new Set<string>([
-      ...app.transactions.map((t) => t.date),
-      ...app.focusSessions.filter((s) => s.completed).map((s) => toISODate(new Date(s.startedAt))),
-    ])
-    return loggingStreak(days, now)
+  const streak = useMemo(
+    () => currentStreak(activityDays(app.transactions, app.focusSessions, app.usageLogs), now),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [app.transactions, app.focusSessions])
+    [app.transactions, app.focusSessions, app.usageLogs],
+  )
 
   const rangeTotals = useMemo(() => {
     let income = 0
@@ -131,11 +118,13 @@ export default function HomeScreen() {
             </div>
             <div className="screen__subtitle">Here's where your money stands today.</div>
           </div>
-          {streak > 0 && (
-            <span className="pill" style={{ background: 'var(--accent-soft)', color: 'var(--warning)', border: 'none' }}>
-              🔥 {streak}
-            </span>
-          )}
+          <button
+            className="pill"
+            onClick={() => nav('/rewards')}
+            style={{ background: 'var(--accent-soft)', color: 'var(--warning)', border: 'none', cursor: 'pointer' }}
+          >
+            🔥 {streak}
+          </button>
         </div>
       </div>
 
