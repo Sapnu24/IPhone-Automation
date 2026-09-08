@@ -1,5 +1,6 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { AppProvider, useApp } from './store'
+import { SyncProvider } from './lib/sync'
 import TabBar from './components/TabBar'
 import ChatFab from './components/ChatFab'
 import { Bee } from './components/Mascot'
@@ -64,7 +65,9 @@ export default function App() {
   return (
     <HashRouter>
       <AppProvider>
-        <Shell />
+        <SyncProvider>
+          <Shell />
+        </SyncProvider>
       </AppProvider>
     </HashRouter>
   )

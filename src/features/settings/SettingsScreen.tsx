@@ -3,6 +3,7 @@ import { useApp } from '../../store'
 import Sheet from '../../components/Sheet'
 import { ScreenHeader, SegmentedControl } from '../../components/ui'
 import { BuzzTurnaround } from '../../components/Mascot'
+import { useSync } from '../../lib/sync'
 import { IconDownload, IconPlus, IconTrash, IconUpload, IconCalendar } from '../../components/Icons'
 import { exportBackup, downloadText, importBackupFile } from '../../lib/backup'
 import { transactionsToCSV, parseTransactionsCSV } from '../../lib/csv'
@@ -114,6 +115,9 @@ export default function SettingsScreen() {
           {msg}
         </div>
       )}
+
+      <div className="section-label">Account &amp; sync</div>
+      <SyncCard />
 
       <div className="section-label">Appearance</div>
       <div className="card card--pad stack">
@@ -322,6 +326,103 @@ export default function SettingsScreen() {
       <Sheet open={addCatOpen} onClose={() => setAddCatOpen(false)} title="New category">
         <AddCategoryForm onDone={() => setAddCatOpen(false)} />
       </Sheet>
+    </div>
+  )
+}
+
+function SyncCard() {
+  const sync = useSync()
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  if (!sync.available) {
+    return (
+      <div className="card card--pad dim" style={{ fontSize: 14, lineHeight: 1.5 }}>
+        ☁️ <strong>Cloud sync</strong> isn't switched on yet. Once it's configured, you'll be able to
+        <strong> sign in with Google</strong> here to back up your data and sync it across your
+        devices. Everything stays on-device until then.
+      </div>
+    )
+  }
+
+  const when =
+    sync.lastSyncedAt != null
+      ? new Date(sync.lastSyncedAt).toLocaleString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        })
+      : null
+
+  async function withBusy(fn: () => Promise<void>) {
+    setErr(null)
+    setBusy(true)
+    try {
+      await fn()
+    } catch (e) {
+      setErr((e as Error).message || 'Something went wrong')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!sync.user) {
+    return (
+      <div className="card card--pad stack">
+        <div style={{ fontWeight: 700 }}>Back up &amp; sync across devices</div>
+        <div className="dim" style={{ fontSize: 13, lineHeight: 1.5 }}>
+          Sign in with Google to keep your money data safe and in sync on every device. Your data is
+          stored privately in your own cloud project.
+        </div>
+        <button className="btn btn--primary btn--block" disabled={busy} onClick={() => void withBusy(sync.signIn)}>
+          {busy ? 'Opening…' : 'Continue with Google'}
+        </button>
+        {err && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{err}</div>}
+      </div>
+    )
+  }
+
+  const statusLabel =
+    sync.status === 'syncing'
+      ? 'Syncing…'
+      : sync.status === 'error'
+        ? 'Sync error — will retry'
+        : when
+          ? `Synced · ${when}`
+          : 'Synced'
+
+  return (
+    <div className="card card--pad stack">
+      <div className="row" style={{ gap: 12 }}>
+        <div className="avatar hex" style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}>
+          ☁️
+        </div>
+        <div className="grow" style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {sync.user.displayName || sync.user.email || 'Signed in'}
+          </div>
+          <div
+            className="muted"
+            style={{ fontSize: 12, color: sync.status === 'error' ? 'var(--danger)' : undefined }}
+          >
+            {statusLabel}
+          </div>
+        </div>
+      </div>
+      <div className="row" style={{ gap: 8 }}>
+        <button
+          className="btn btn--ghost grow"
+          disabled={busy || sync.status === 'syncing'}
+          onClick={() => void withBusy(sync.syncNow)}
+        >
+          Sync now
+        </button>
+        <button className="btn btn--ghost grow" disabled={busy} onClick={() => void withBusy(sync.signOut)}>
+          Sign out
+        </button>
+      </div>
+      {err && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{err}</div>}
     </div>
   )
 }
