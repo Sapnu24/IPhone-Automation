@@ -10,13 +10,12 @@ const ACTIVE: { label: string; sub: string; icon: string; to: string }[] = [
   { label: 'Debt', sub: 'Track what you owe', icon: '💳', to: '/debt' },
   { label: 'Owed to you', sub: 'IOUs & split bills', icon: '🤝', to: '/owed' },
   { label: 'Notes', sub: 'Quick money notes', icon: '📝', to: '/notes' },
+  { label: 'Tools', sub: 'Currency, tax, shopping, warranty', icon: '🛠️', to: '/tools' },
+  { label: 'Coach', sub: 'Bite-size financial literacy', icon: '🎓', to: '/coach' },
   { label: 'Settings', sub: 'Currency, theme, backup, data', icon: '⚙️', to: '/settings' },
 ]
 
-const SOON = [
-  { label: 'Tools', sub: 'Currency, tax, shopping list…', icon: '🛠️' },
-  { label: 'Coach', sub: 'Bite-size financial literacy', icon: '🎓' },
-]
+const SOON: { label: string; sub: string; icon: string }[] = []
 
 export default function MoreScreen() {
   const nav = useNavigate()
@@ -43,7 +42,8 @@ export default function MoreScreen() {
         ))}
       </div>
 
-      <div className="section-label">Coming soon</div>
+      {SOON.length > 0 && <div className="section-label">Coming soon</div>}
+      {SOON.length > 0 && (
       <div className="card list">
         {SOON.map((it) => (
           <div key={it.label} className="list__row" style={{ opacity: 0.7 }}>
@@ -62,6 +62,7 @@ export default function MoreScreen() {
           </div>
         ))}
       </div>
+      )}
     </div>
   )
 }

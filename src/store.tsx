@@ -14,9 +14,11 @@ import {
   type Ledger,
   type Note,
   type Settings,
+  type ShoppingItem,
   type Transaction,
   type Transfer,
   type UsageLog,
+  type Warranty,
 } from './types'
 
 interface AppValue {
@@ -34,6 +36,8 @@ interface AppValue {
   incomePlans: IncomePlan[]
   ledgers: Ledger[]
   notes: Note[]
+  shoppingItems: ShoppingItem[]
+  warranties: Warranty[]
 
   categoryById: (id: string) => Category | undefined
   accountById: (id: string) => Account | undefined
@@ -76,6 +80,15 @@ interface AppValue {
   updateNote: (n: Note) => Promise<void>
   deleteNote: (id: string) => Promise<void>
 
+  addShoppingItem: (i: Omit<ShoppingItem, 'id' | 'createdAt' | 'checked'>) => Promise<ShoppingItem>
+  updateShoppingItem: (i: ShoppingItem) => Promise<void>
+  deleteShoppingItem: (id: string) => Promise<void>
+  clearCheckedShopping: () => Promise<void>
+
+  addWarranty: (w: Omit<Warranty, 'id' | 'createdAt'>) => Promise<Warranty>
+  updateWarranty: (w: Warranty) => Promise<void>
+  deleteWarranty: (id: string) => Promise<void>
+
   updateSettings: (patch: Partial<Settings>) => Promise<void>
   reloadAll: () => Promise<void>
 }
@@ -103,10 +116,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [incomePlans, setIncomePlans] = useState<IncomePlan[]>([])
   const [ledgers, setLedgers] = useState<Ledger[]>([])
   const [notes, setNotes] = useState<Note[]>([])
+  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([])
+  const [warranties, setWarranties] = useState<Warranty[]>([])
 
   async function reloadAll() {
     await db.ensureSeed()
-    const [s, cats, txns, bl, occ, bud, fs, ul, accts, trs, inc, led, nts] = await Promise.all([
+    const [s, cats, txns, bl, occ, bud, fs, ul, accts, trs, inc, led, nts, shop, war] = await Promise.all([
       db.getSettings(),
       db.getAll<Category>(STORES.categories),
       db.getAll<Transaction>(STORES.transactions),
@@ -120,6 +135,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       db.getAll<IncomePlan>(STORES.incomePlans),
       db.getAll<Ledger>(STORES.ledgers),
       db.getAll<Note>(STORES.notes),
+      db.getAll<ShoppingItem>(STORES.shoppingItems),
+      db.getAll<Warranty>(STORES.warranties),
     ])
     setSettings(s)
     setCategories(cats)
@@ -134,6 +151,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIncomePlans(inc)
     setLedgers(led)
     setNotes(nts)
+    setShoppingItems(shop)
+    setWarranties(war)
   }
 
   useEffect(() => {
@@ -170,6 +189,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     incomePlans,
     ledgers,
     notes,
+    shoppingItems,
+    warranties,
 
     categoryById: (id) => categories.find((c) => c.id === id),
     accountById: (id) => accounts.find((a) => a.id === id),
@@ -327,6 +348,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async deleteNote(id) {
       await db.remove(STORES.notes, id)
       setNotes((prev) => prev.filter((x) => x.id !== id))
+    },
+
+    async addShoppingItem(input) {
+      const i: ShoppingItem = { ...input, id: uid(), checked: false, createdAt: Date.now() }
+      await db.put(STORES.shoppingItems, i)
+      setShoppingItems((prev) => [...prev, i])
+      return i
+    },
+    async updateShoppingItem(i) {
+      await db.put(STORES.shoppingItems, i)
+      setShoppingItems((prev) => prev.map((x) => (x.id === i.id ? i : x)))
+    },
+    async deleteShoppingItem(id) {
+      await db.remove(STORES.shoppingItems, id)
+      setShoppingItems((prev) => prev.filter((x) => x.id !== id))
+    },
+    async clearCheckedShopping() {
+      const checked = shoppingItems.filter((i) => i.checked)
+      for (const i of checked) await db.remove(STORES.shoppingItems, i.id)
+      setShoppingItems((prev) => prev.filter((i) => !i.checked))
+    },
+
+    async addWarranty(input) {
+      const w: Warranty = { ...input, id: uid(), createdAt: Date.now() }
+      await db.put(STORES.warranties, w)
+      setWarranties((prev) => [...prev, w])
+      return w
+    },
+    async updateWarranty(w) {
+      await db.put(STORES.warranties, w)
+      setWarranties((prev) => prev.map((x) => (x.id === w.id ? w : x)))
+    },
+    async deleteWarranty(id) {
+      await db.remove(STORES.warranties, id)
+      setWarranties((prev) => prev.filter((x) => x.id !== id))
     },
 
     async updateSettings(patch) {

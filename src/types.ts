@@ -84,6 +84,23 @@ export interface Note {
   updatedAt: number
 }
 
+export interface ShoppingItem {
+  id: string
+  name: string
+  price?: number
+  checked: boolean
+  createdAt: number
+}
+
+export interface Warranty {
+  id: string
+  name: string
+  purchaseDate: string // ISO date
+  months: number // warranty length in months
+  note?: string
+  createdAt: number
+}
+
 export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string; group: AccountGroup }[] = [
   { value: 'cash', label: 'Cash', icon: '👛', group: 'asset' },
   { value: 'ewallet', label: 'E-wallet', icon: '📱', group: 'asset' },

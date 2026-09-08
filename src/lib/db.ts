@@ -13,13 +13,15 @@ import {
   type Ledger,
   type Note,
   type Settings,
+  type ShoppingItem,
   type Transaction,
   type Transfer,
   type UsageLog,
+  type Warranty,
 } from '../types'
 
 const DB_NAME = 'anchor'
-const DB_VERSION = 4
+const DB_VERSION = 5
 
 export const STORES = {
   transactions: 'transactions',
@@ -34,6 +36,8 @@ export const STORES = {
   incomePlans: 'incomePlans',
   ledgers: 'ledgers',
   notes: 'notes',
+  shoppingItems: 'shoppingItems',
+  warranties: 'warranties',
   images: 'images',
   meta: 'meta',
 } as const
@@ -83,6 +87,12 @@ function getDB(): Promise<IDBPDatabase> {
         }
         if (!db.objectStoreNames.contains(STORES.notes)) {
           db.createObjectStore(STORES.notes, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.shoppingItems)) {
+          db.createObjectStore(STORES.shoppingItems, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.warranties)) {
+          db.createObjectStore(STORES.warranties, { keyPath: 'id' })
         }
         if (!db.objectStoreNames.contains(STORES.images)) {
           db.createObjectStore(STORES.images, { keyPath: 'id' })
@@ -192,6 +202,8 @@ export interface Snapshot {
   incomePlans: IncomePlan[]
   ledgers: Ledger[]
   notes: Note[]
+  shoppingItems: ShoppingItem[]
+  warranties: Warranty[]
 }
 
 export async function exportSnapshot(): Promise<Snapshot> {
@@ -211,6 +223,8 @@ export async function exportSnapshot(): Promise<Snapshot> {
     incomePlans: await getAll<IncomePlan>(STORES.incomePlans),
     ledgers: await getAll<Ledger>(STORES.ledgers),
     notes: await getAll<Note>(STORES.notes),
+    shoppingItems: await getAll<ShoppingItem>(STORES.shoppingItems),
+    warranties: await getAll<Warranty>(STORES.warranties),
   }
 }
 
@@ -229,6 +243,8 @@ export async function importSnapshot(snap: Snapshot): Promise<void> {
     clearStore(STORES.incomePlans),
     clearStore(STORES.ledgers),
     clearStore(STORES.notes),
+    clearStore(STORES.shoppingItems),
+    clearStore(STORES.warranties),
   ])
   await Promise.all([
     putMany(STORES.categories, snap.categories ?? []),
@@ -243,6 +259,8 @@ export async function importSnapshot(snap: Snapshot): Promise<void> {
     putMany(STORES.incomePlans, snap.incomePlans ?? []),
     putMany(STORES.ledgers, snap.ledgers ?? []),
     putMany(STORES.notes, snap.notes ?? []),
+    putMany(STORES.shoppingItems, snap.shoppingItems ?? []),
+    putMany(STORES.warranties, snap.warranties ?? []),
   ])
   if (snap.settings) await saveSettings(snap.settings)
 }
