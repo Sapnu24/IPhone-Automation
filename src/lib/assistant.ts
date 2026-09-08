@@ -5,6 +5,7 @@ import { SUBSCRIPTION_PRESETS } from '../types'
 import { cashflow, categorySpend, currentMonthKey, monthTotals, outstandingBills } from './money'
 import { walletTotals } from './accounts'
 import { formatMoney, todayISO } from './format'
+import { parseMessage } from './txnParse'
 
 export interface Ctx {
   categories: Pick<Category, 'id' | 'name' | 'kind'>[]
@@ -180,6 +181,22 @@ function classify(line: string, ctx: Ctx): LineResult {
   // Question
   const hasLeadingAmount = /^\+?\s*(?:₱|php|p)?\s*[\d]/.test(lower)
   if (QUESTION_RE.test(lower) && !hasLeadingAmount) return { question: line }
+
+  // Bank / e-wallet / payout notification (pasted SMS or email, or piped in by
+  // a Shortcut). Recognised before the casual parser so the amount + direction
+  // come from the message's own wording.
+  const bank = parseMessage(line)
+  if (bank) {
+    const acct = findAccount(lower, ctx)
+    const accountId = acct?.id ?? ctx.defaultAccountId
+    let note = bank.merchant ? pretty(bank.merchant.toLowerCase()) : undefined
+    if (bank.currency === 'USD') note = note ? `${note} (USD)` : 'USD'
+    if (bank.kind === 'income') {
+      const incCat = ctx.categories.find((c) => c.kind === 'income')?.id ?? 'cat-income'
+      return { action: { type: 'income', amount: bank.amount, categoryId: incCat, accountId, note } }
+    }
+    return { action: { type: 'expense', amount: bank.amount, categoryId: resolveCategory(lower, ctx), accountId, note } }
+  }
 
   const amt = parseAmount(lower)
   if (amt != null) {
