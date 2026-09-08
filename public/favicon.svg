@@ -1,17 +1,42 @@
-<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Anchor">
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hive">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#3f6dff" />
-      <stop offset="1" stop-color="#6a97ff" />
+      <stop offset="0" stop-color="#1f9d55" />
+      <stop offset="1" stop-color="#37b06a" />
     </linearGradient>
+    <clipPath id="body">
+      <ellipse cx="256" cy="300" rx="64" ry="70" />
+    </clipPath>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)" />
-  <g fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="256" cy="150" r="30" />
-    <line x1="256" y1="182" x2="256" y2="372" />
-    <line x1="196" y1="212" x2="316" y2="212" />
-    <path d="M150 280 A106 106 0 0 0 362 280" />
-    <path d="M150 280 l-6 40 44 -6" />
-    <path d="M362 280 l6 40 -44 -6" />
+  <!-- faint honeycomb accents -->
+  <g fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="7">
+    <polygon points="70,60 96,75 96,105 70,120 44,105 44,75" />
+    <polygon points="452,392 478,407 478,437 452,452 426,437 426,407" />
+    <polygon points="452,80 478,95 478,125 452,140 426,125 426,95" />
   </g>
+  <!-- honey cell -->
+  <polygon points="256,86 405,171 405,341 256,426 107,341 107,171" fill="#fffdf7" />
+  <polygon points="256,86 405,171 405,341 256,426 107,341 107,171" fill="none" stroke="#f2d79a" stroke-width="6" />
+  <!-- wings -->
+  <ellipse cx="206" cy="232" rx="34" ry="50" fill="#eaf6ff" stroke="#cfe6f5" stroke-width="3" transform="rotate(-22 206 232)" />
+  <ellipse cx="306" cy="232" rx="34" ry="50" fill="#eaf6ff" stroke="#cfe6f5" stroke-width="3" transform="rotate(22 306 232)" />
+  <!-- body -->
+  <ellipse cx="256" cy="300" rx="64" ry="70" fill="#f5a524" />
+  <g clip-path="url(#body)">
+    <rect x="184" y="260" width="144" height="20" rx="10" fill="#20130a" />
+    <rect x="184" y="300" width="144" height="20" rx="10" fill="#20130a" />
+    <rect x="184" y="340" width="144" height="20" rx="10" fill="#20130a" />
+  </g>
+  <!-- head -->
+  <circle cx="256" cy="196" r="48" fill="#20130a" />
+  <circle cx="240" cy="192" r="15" fill="#fff" />
+  <circle cx="274" cy="192" r="15" fill="#fff" />
+  <circle cx="242" cy="194" r="7" fill="#20130a" />
+  <circle cx="276" cy="194" r="7" fill="#20130a" />
+  <!-- antennae -->
+  <path d="M236 158 q-12 -18 -22 -24" fill="none" stroke="#20130a" stroke-width="7" stroke-linecap="round" />
+  <path d="M276 158 q12 -18 22 -24" fill="none" stroke="#20130a" stroke-width="7" stroke-linecap="round" />
+  <circle cx="212" cy="132" r="7" fill="#20130a" />
+  <circle cx="300" cy="132" r="7" fill="#20130a" />
 </svg>

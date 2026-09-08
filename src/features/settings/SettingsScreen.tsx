@@ -94,6 +94,16 @@ export default function SettingsScreen() {
       <div className="section-label">Appearance</div>
       <div className="card card--pad stack">
         <div className="field">
+          <label className="field__label">Your name (for the greeting)</label>
+          <input
+            className="input"
+            value={app.settings.name ?? ''}
+            onChange={(e) => app.updateSettings({ name: e.target.value.trim() || undefined })}
+            placeholder="e.g. Pam"
+            maxLength={20}
+          />
+        </div>
+        <div className="field">
           <label className="field__label">Theme</label>
           <SegmentedControl
             options={[
@@ -231,13 +241,13 @@ export default function SettingsScreen() {
       <div className="section-label">Install on your iPhone</div>
       <div className="card card--pad dim" style={{ fontSize: 14, lineHeight: 1.5 }}>
         In <strong>Safari</strong>, tap the <strong>Share</strong> button, then{' '}
-        <strong>Add to Home Screen</strong>. Anchor will open full-screen with its own icon and work
+        <strong>Add to Home Screen</strong>. Hive will open full-screen with its own icon and work
         offline — your data stays on this device.
       </div>
 
       <div className="section-label">About</div>
       <div className="card card--pad dim" style={{ fontSize: 14, lineHeight: 1.5 }}>
-        <strong>Anchor</strong> keeps everything on your device — no account, no servers. Screen-time
+        <strong>Hive</strong> keeps everything on your device — no account, no servers. Screen-time
         limits and app-locking need a native iOS app; see the{' '}
         <a
           href="https://github.com/Sapnu24/IPhone-Automation/blob/main/docs/NATIVE_ROADMAP.md"

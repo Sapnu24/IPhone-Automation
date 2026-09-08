@@ -88,14 +88,15 @@ export interface Settings {
   locale: string
   theme: ThemePref
   pomodoro: PomodoroConfig
+  name?: string // optional first name for the greeting
 }
 
 // ---- Defaults -----------------------------------------------------------
 
 export function defaultSettings(): Settings {
   return {
-    currency: 'USD',
-    locale: 'en-US',
+    currency: 'PHP',
+    locale: 'en-PH',
     theme: 'system',
     pomodoro: { workMin: 25, shortMin: 5, longMin: 15, longEvery: 4 },
   }

@@ -1,37 +1,43 @@
-/* Design tokens — an iOS-flavoured, calm "fintech" system with light + dark.
-   Light is the default (:root). Dark applies when the system prefers dark and
-   the user hasn't overridden, or when [data-theme="dark"] is set explicitly. */
+/* Design tokens — "Hive": a green + honey (bee/honeycomb) system, iOS-flavoured,
+   with light + dark. Light is the default (:root). Dark applies when the system
+   prefers dark and the user hasn't overridden, or when [data-theme="dark"]. */
 
 :root {
-  /* Surfaces */
-  --bg: #eef1f6;
+  /* Surfaces (warm cream in light) */
+  --bg: #f4f2ea;
   --bg-elev: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f4f6fb;
-  --surface-3: #eaeef6;
-  --border: rgba(15, 23, 42, 0.1);
-  --border-strong: rgba(15, 23, 42, 0.16);
+  --surface-2: #f5f2e9;
+  --surface-3: #ece7d8;
+  --border: rgba(30, 41, 26, 0.1);
+  --border-strong: rgba(30, 41, 26, 0.16);
 
   /* Text */
-  --text: #0b1220;
-  --text-2: #46536b;
-  --text-3: #8793a8;
+  --text: #14231a;
+  --text-2: #4a5b50;
+  --text-3: #8a978c;
 
-  /* Brand + semantic */
-  --primary: #3f6dff;
-  --primary-2: #6a97ff;
+  /* Brand: leaf green primary + honey accent */
+  --primary: #1f9d55;
+  --primary-2: #37b06a;
   --primary-ink: #ffffff;
-  --primary-soft: rgba(63, 109, 255, 0.12);
+  --primary-soft: rgba(31, 157, 85, 0.12);
+  --accent: #f5a524;
+  --accent-2: #f6b73c;
+  --accent-ink: #3a2a00;
+  --accent-soft: rgba(245, 165, 36, 0.16);
+
+  /* Semantic */
   --success: #12a15f;
   --success-soft: rgba(18, 161, 95, 0.12);
-  --warning: #c07a00;
-  --warning-soft: rgba(214, 158, 46, 0.16);
+  --warning: #b3730a;
+  --warning-soft: rgba(245, 165, 36, 0.18);
   --danger: #e23d4f;
   --danger-soft: rgba(226, 61, 79, 0.12);
 
-  /* Category accent palette (used by pills, dots, charts) */
+  /* Category accent palette (validated for distinctness incl. color vision) */
   --c-housing: #3f6dff;
-  --c-food: #12a15f;
+  --c-food: #16a34a;
   --c-transport: #d98a00;
   --c-utilities: #7c5cff;
   --c-fun: #e23d8f;
@@ -46,9 +52,9 @@
   --radius-sm: 12px;
   --radius-lg: 24px;
   --radius-pill: 999px;
-  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.05);
-  --shadow-2: 0 6px 20px rgba(15, 23, 42, 0.1);
-  --shadow-pop: 0 12px 40px rgba(15, 23, 42, 0.22);
+  --shadow-1: 0 1px 2px rgba(20, 35, 26, 0.06), 0 1px 3px rgba(20, 35, 26, 0.05);
+  --shadow-2: 0 6px 20px rgba(20, 35, 26, 0.1);
+  --shadow-pop: 0 12px 40px rgba(20, 35, 26, 0.22);
 
   /* Spacing rhythm */
   --sp-1: 4px;
@@ -69,29 +75,34 @@
   color-scheme: light;
 }
 
-/* Dark palette (shared by system-dark and explicit dark) */
+/* Dark palette (deep forest) — shared by system-dark and explicit dark */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0b1220;
-    --bg-elev: #111b31;
-    --surface: #15203a;
-    --surface-2: #1b2947;
-    --surface-3: #223154;
+    --bg: #0e1512;
+    --bg-elev: #14201a;
+    --surface: #16241d;
+    --surface-2: #1e2f26;
+    --surface-3: #26382d;
     --border: rgba(255, 255, 255, 0.09);
     --border-strong: rgba(255, 255, 255, 0.16);
 
-    --text: #f2f5fb;
-    --text-2: #b3bfd6;
-    --text-3: #7f8ca8;
+    --text: #eef4ee;
+    --text-2: #b3c4b8;
+    --text-3: #7e9084;
 
-    --primary: #5b8cff;
-    --primary-2: #86a9ff;
-    --primary-ink: #071021;
-    --primary-soft: rgba(91, 140, 255, 0.18);
+    --primary: #34c777;
+    --primary-2: #5fd694;
+    --primary-ink: #062012;
+    --primary-soft: rgba(52, 199, 119, 0.16);
+    --accent: #f6b73c;
+    --accent-2: #f8c96a;
+    --accent-ink: #2a1e00;
+    --accent-soft: rgba(246, 183, 60, 0.18);
+
     --success: #34d399;
     --success-soft: rgba(52, 211, 153, 0.16);
-    --warning: #fbbf24;
-    --warning-soft: rgba(251, 191, 36, 0.18);
+    --warning: #f6b73c;
+    --warning-soft: rgba(246, 183, 60, 0.18);
     --danger: #fb7185;
     --danger-soft: rgba(251, 113, 133, 0.18);
 
@@ -115,26 +126,31 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: #0b1220;
-  --bg-elev: #111b31;
-  --surface: #15203a;
-  --surface-2: #1b2947;
-  --surface-3: #223154;
+  --bg: #0e1512;
+  --bg-elev: #14201a;
+  --surface: #16241d;
+  --surface-2: #1e2f26;
+  --surface-3: #26382d;
   --border: rgba(255, 255, 255, 0.09);
   --border-strong: rgba(255, 255, 255, 0.16);
 
-  --text: #f2f5fb;
-  --text-2: #b3bfd6;
-  --text-3: #7f8ca8;
+  --text: #eef4ee;
+  --text-2: #b3c4b8;
+  --text-3: #7e9084;
 
-  --primary: #5b8cff;
-  --primary-2: #86a9ff;
-  --primary-ink: #071021;
-  --primary-soft: rgba(91, 140, 255, 0.18);
+  --primary: #34c777;
+  --primary-2: #5fd694;
+  --primary-ink: #062012;
+  --primary-soft: rgba(52, 199, 119, 0.16);
+  --accent: #f6b73c;
+  --accent-2: #f8c96a;
+  --accent-ink: #2a1e00;
+  --accent-soft: rgba(246, 183, 60, 0.18);
+
   --success: #34d399;
   --success-soft: rgba(52, 211, 153, 0.16);
-  --warning: #fbbf24;
-  --warning-soft: rgba(251, 191, 36, 0.18);
+  --warning: #f6b73c;
+  --warning-soft: rgba(246, 183, 60, 0.18);
   --danger: #fb7185;
   --danger-soft: rgba(251, 113, 133, 0.18);
 
@@ -145,7 +161,7 @@
   --c-fun: #f472b6;
   --c-health: #2dd4bf;
   --c-shopping: #fb923c;
-  --c-subs: #c084fc;
+  --c-subs: #e879f9;
   --c-income: #34d399;
   --c-other: #94a3b8;
 
