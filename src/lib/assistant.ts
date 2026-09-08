@@ -1,6 +1,7 @@
 // Offline, rule-based "chat" assistant: turns plain-language money commands into
 // transactions/transfers, and answers common questions. No AI service, no network.
 import type { Account, Bill, BillOccurrence, Category, Settings, Transaction, Transfer } from '../types'
+import { SUBSCRIPTION_PRESETS } from '../types'
 import { cashflow, categorySpend, currentMonthKey, monthTotals, outstandingBills } from './money'
 import { walletTotals } from './accounts'
 import { formatMoney, todayISO } from './format'
@@ -14,6 +15,7 @@ export interface Ctx {
 export type Action =
   | { type: 'expense' | 'income'; amount: number; categoryId: string; accountId?: string; note?: string }
   | { type: 'transfer'; amount: number; fromAccountId: string; toAccountId: string; note?: string }
+  | { type: 'subscription'; amount: number; name: string; icon?: string; categoryId: string }
 
 export type LineResult = { action: Action } | { question: string } | { unknown: string }
 
@@ -73,11 +75,64 @@ function resolveCategory(text: string, ctx: Ctx): string {
   return ctx.categories.find((c) => c.id === 'cat-other')?.id ?? ctx.categories.find((c) => c.kind === 'expense')?.id ?? 'cat-other'
 }
 
-function cleanNote(line: string): string {
-  return stripAmount(line)
-    .replace(/\b(from|for|on|spent|paid|bought|at|sa|kay|ng|the|a|an|to|my)\b/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+const SUBSCRIPTION_RE = /\b(subscription|subscribe(d)?|sub to|renew(al)?)\b/i
+
+// Filler words to drop so the note is just the merchant/item.
+const FILLER_RE =
+  /\b(i|ive|have|has|had|a|an|the|my|me|this|that|of|is|are|am|on|for|from|at|to|in|with|and|sa|kay|ng|na|po|ako|ko|si|meron|may|mga|spent|spend|spending|paid|pay|pays|bought|buy|buying|purchase[d]?|got|nag|nagbayad|bumili|subscription|subscribe[d]?|sub|renew|renewal|renewed|monthly|month|per|every|php|peso[s]?|piso[s]?)\b/gi
+
+// Nicer display casing for common PH merchants / services.
+const DISPLAY: Record<string, string> = {
+  mcdo: 'McDo', mcdonald: "McDonald's", mcdonalds: "McDonald's", jollibee: 'Jollibee', jjb: 'Jollibee',
+  kfc: 'KFC', chowking: 'Chowking', sbux: 'Starbucks', starbucks: 'Starbucks', grab: 'Grab',
+  grabfood: 'GrabFood', foodpanda: 'Foodpanda', shopee: 'Shopee', lazada: 'Lazada', netflix: 'Netflix',
+  spotify: 'Spotify', youtube: 'YouTube', hbo: 'HBO Max', disney: 'Disney+', canva: 'Canva', viu: 'Viu',
+  meralco: 'Meralco', maynilad: 'Maynilad', converge: 'Converge', pldt: 'PLDT', globe: 'Globe',
+  smart: 'Smart', gcash: 'GCash', maya: 'Maya', angkas: 'Angkas', joyride: 'JoyRide', mrt: 'MRT',
+  lrt: 'LRT', uniqlo: 'Uniqlo', watsons: 'Watsons', jeepney: 'Jeepney', jeep: 'Jeep', icloud: 'iCloud+',
+  claude: 'Claude', chatgpt: 'ChatGPT', iqiyi: 'iQIYI',
+}
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/** Strip amount, an explicit account name (and its first word), and filler
+ *  words → the raw merchant. */
+function extractMerchant(line: string, acctName?: string): string {
+  let s = stripAmount(line).toLowerCase().replace(/[₱]/g, ' ')
+  if (acctName) {
+    const full = acctName.toLowerCase()
+    s = s.replace(new RegExp(`\\b${escapeRe(full)}\\b`, 'g'), ' ')
+    const first = full.split(/\s+/)[0]
+    if (first.length >= 3) s = s.replace(new RegExp(`\\b${escapeRe(first)}\\b`, 'g'), ' ')
+  }
+  return s.replace(FILLER_RE, ' ').replace(/\s+/g, ' ').trim()
+}
+
+/** Title-case a merchant, using the nicer-casing map where we have it. */
+function pretty(m: string): string {
+  if (!m) return ''
+  if (DISPLAY[m.replace(/\s+/g, '')]) return DISPLAY[m.replace(/\s+/g, '')]
+  return m
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => DISPLAY[w] ?? w[0].toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+function noteFrom(line: string, acctName?: string): string | undefined {
+  return pretty(extractMerchant(line, acctName)) || undefined
+}
+
+/** Match a service name to a preset emoji (Canva → 🎨, Netflix → 🎬…). */
+function presetIcon(name: string): string | undefined {
+  const n = name.toLowerCase()
+  if (!n) return undefined
+  const p = SUBSCRIPTION_PRESETS.find(
+    (x) => x.name.toLowerCase() === n || x.name.toLowerCase().includes(n) || n.includes(x.name.toLowerCase()),
+  )
+  return p?.icon
 }
 
 function classify(line: string, ctx: Ctx): LineResult {
@@ -100,13 +155,22 @@ function classify(line: string, ctx: Ctx): LineResult {
   const hasLeadingAmount = /^\+?\s*(?:₱|php|p)?\s*[\d]/.test(lower)
   if (QUESTION_RE.test(lower) && !hasLeadingAmount) return { question: line }
 
-  // Log expense/income
   const amt = parseAmount(lower)
   if (amt != null) {
-    const income = INCOME_WORDS.some((w) => lower.includes(w)) || /^\+/.test(line.trim())
     const acct = findAccount(lower, ctx)
+
+    // Subscription: "subscription on canva 480" → a recurring Subscriptions entry.
+    if (SUBSCRIPTION_RE.test(lower)) {
+      const name = noteFrom(line, acct?.name) ?? 'Subscription'
+      const catId = ctx.categories.some((c) => c.id === 'cat-subs')
+        ? 'cat-subs'
+        : resolveCategory(lower, ctx)
+      return { action: { type: 'subscription', amount: amt, name, icon: presetIcon(name), categoryId: catId } }
+    }
+
+    const income = INCOME_WORDS.some((w) => lower.includes(w)) || /^\+/.test(line.trim())
     const accountId = acct?.id ?? ctx.defaultAccountId
-    const note = cleanNote(line) || undefined
+    const note = noteFrom(line, acct?.name)
     if (income) {
       const incCat = ctx.categories.find((c) => c.kind === 'income')?.id ?? 'cat-income'
       return { action: { type: 'income', amount: amt, categoryId: incCat, accountId, note } }

@@ -12,7 +12,7 @@ interface Msg {
   id: string
   role: 'user' | 'assistant'
   text?: string
-  card?: { items: LoggedItem[]; txnIds: string[]; transferIds: string[]; undone?: boolean }
+  card?: { items: LoggedItem[]; txnIds: string[]; transferIds: string[]; billIds: string[]; undone?: boolean }
 }
 
 const EXAMPLES = ['500 mcdo', 'spent 120 grab', 'how much on food?', 'balance?']
@@ -60,6 +60,9 @@ export default function ChatPanel({ onClose }: { onClose?: () => void }) {
       const to = app.accountById(a.toAccountId)?.name ?? 'account'
       return `Transfer: ${money(a.amount)} from ${from} to ${to}`
     }
+    if (a.type === 'subscription') {
+      return `Subscription: ${money(a.amount)} · ${a.name} · monthly`
+    }
     const cat = app.categoryById(a.categoryId)?.name ?? 'Other'
     const acct = a.accountId ? app.accountById(a.accountId)?.name : undefined
     const verb = a.type === 'income' ? 'Income' : 'Expense'
@@ -76,6 +79,7 @@ export default function ChatPanel({ onClose }: { onClose?: () => void }) {
     const items: LoggedItem[] = []
     const txnIds: string[] = []
     const transferIds: string[] = []
+    const billIds: string[] = []
     const answers: string[] = []
 
     for (const r of results) {
@@ -84,6 +88,18 @@ export default function ChatPanel({ onClose }: { onClose?: () => void }) {
         if (a.type === 'transfer') {
           const tr = await app.addTransfer({ fromAccountId: a.fromAccountId, toAccountId: a.toAccountId, amount: a.amount, date: todayISO() })
           transferIds.push(tr.id)
+        } else if (a.type === 'subscription') {
+          const b = await app.addBill({
+            name: a.name,
+            icon: a.icon,
+            amount: a.amount,
+            categoryId: a.categoryId,
+            dueDate: todayISO(),
+            recurrence: 'monthly',
+            reminderDaysBefore: 2,
+            autopay: false,
+          })
+          billIds.push(b.id)
         } else {
           const t = await app.addTransaction({ kind: a.type, amount: a.amount, categoryId: a.categoryId, accountId: a.accountId, note: a.note, date: todayISO() })
           txnIds.push(t.id)
@@ -105,7 +121,7 @@ export default function ChatPanel({ onClose }: { onClose?: () => void }) {
     }
 
     const out: Msg[] = []
-    if (items.length) out.push({ id: mid(), role: 'assistant', card: { items, txnIds, transferIds } })
+    if (items.length) out.push({ id: mid(), role: 'assistant', card: { items, txnIds, transferIds, billIds } })
     if (answers.length) out.push({ id: mid(), role: 'assistant', text: answers.join('\n\n') })
     if (!items.length && !answers.length) {
       out.push({
@@ -122,6 +138,7 @@ export default function ChatPanel({ onClose }: { onClose?: () => void }) {
     if (!msg?.card) return
     for (const id of msg.card.txnIds) await app.deleteTransaction(id)
     for (const id of msg.card.transferIds) await app.deleteTransfer(id)
+    for (const id of msg.card.billIds) await app.deleteBill(id)
     setMessages((m) => m.map((x) => (x.id === msgId ? { ...x, card: { ...x.card!, undone: true } } : x)))
   }
 
