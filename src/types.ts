@@ -51,6 +51,18 @@ export interface Transfer {
   createdAt: number
 }
 
+export interface IncomePlan {
+  id: string
+  name: string
+  amount: number
+  accountId?: string
+  nextDate: string // anchor ISO date of the next occurrence
+  recurrence: Recurrence
+  isPayday?: boolean
+  createdAt: number
+  archived?: boolean
+}
+
 export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string; group: AccountGroup }[] = [
   { value: 'cash', label: 'Cash', icon: '👛', group: 'asset' },
   { value: 'ewallet', label: 'E-wallet', icon: '📱', group: 'asset' },

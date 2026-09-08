@@ -84,6 +84,8 @@ const SEED = `(${async () => {
   await put('accounts', { id: 'acct-bpi', name: 'BPI Savings', type: 'savings', group: 'asset', currency: 'PHP', openingBalance: 22450, icon: '🏦', color: 'var(--c-fun)', createdAt: now })
   await put('accounts', { id: 'acct-card', name: 'BDO Mastercard', type: 'card', group: 'liability', currency: 'PHP', openingBalance: -4200, icon: '💳', color: 'var(--c-shopping)', createdAt: now })
   await put('accounts', { id: 'acct-usd', name: 'Wise USD', type: 'bank', group: 'asset', currency: 'USD', openingBalance: 420, icon: '💵', color: 'var(--c-health)', createdAt: now })
+  await put('incomePlans', { id: 'inc-salary', name: 'Salary', amount: 18500, accountId: 'acct-bpi', nextDate: d(2), recurrence: 'monthly', isPayday: true, createdAt: now })
+  await put('incomePlans', { id: 'inc-sell', name: 'Online selling payout', amount: 4500, nextDate: d(12), recurrence: 'monthly', createdAt: now })
 }})()`
 
 const browser = await launch()
@@ -129,6 +131,9 @@ await shot('06-focus')
 
 await page.getByRole('link', { name: 'More' }).click()
 await shot('07-more')
+await page.getByRole('button', { name: /Plan/ }).click()
+await shot('07b-plan')
+await page.getByRole('link', { name: 'More' }).click()
 await page.getByRole('button', { name: /Insights/ }).click()
 await shot('08-insights')
 

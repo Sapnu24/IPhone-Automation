@@ -62,6 +62,25 @@ export function activeOccurrence(
   return d
 }
 
+/** The first occurrence on or after `today`. For a one-time item, the anchor if
+ *  it hasn't passed, else null. */
+export function nextOccurrenceOnOrAfter(
+  anchorISO: string,
+  rec: Recurrence,
+  today: Date = new Date(),
+): Date | null {
+  const anchor = parseISO(anchorISO)
+  const t = startOfDay(today)
+  if (startOfDay(anchor) >= t) return anchor
+  if (rec === 'none') return null
+  let d = anchor
+  for (let i = 0; i < GUARD; i++) {
+    d = addRecurrence(d, rec)
+    if (startOfDay(d) >= t) return d
+  }
+  return null
+}
+
 /** Upcoming occurrences (dates) within `horizonDays` from today, ignoring paid
  *  status — useful for a calendar-style preview. */
 export function upcomingOccurrences(

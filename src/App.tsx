@@ -7,6 +7,7 @@ import MoneyScreen from './features/money/MoneyScreen'
 import FocusScreen from './features/focus/FocusScreen'
 import InsightsScreen from './features/insights/InsightsScreen'
 import ChatScreen from './features/chat/ChatScreen'
+import PlanScreen from './features/plan/PlanScreen'
 import MoreScreen from './features/more/MoreScreen'
 import SettingsScreen from './features/settings/SettingsScreen'
 
@@ -34,6 +35,7 @@ function Shell() {
           <Route path="/money" element={<MoneyScreen />} />
           <Route path="/focus" element={<FocusScreen />} />
           <Route path="/chat" element={<ChatScreen />} />
+          <Route path="/plan" element={<PlanScreen />} />
           <Route path="/insights" element={<InsightsScreen />} />
           <Route path="/more" element={<MoreScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />

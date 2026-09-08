@@ -9,6 +9,7 @@ import {
   type Budget,
   type Category,
   type FocusSession,
+  type IncomePlan,
   type Settings,
   type Transaction,
   type Transfer,
@@ -16,7 +17,7 @@ import {
 } from '../types'
 
 const DB_NAME = 'anchor'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 export const STORES = {
   transactions: 'transactions',
@@ -28,6 +29,7 @@ export const STORES = {
   usageLogs: 'usageLogs',
   accounts: 'accounts',
   transfers: 'transfers',
+  incomePlans: 'incomePlans',
   images: 'images',
   meta: 'meta',
 } as const
@@ -68,6 +70,9 @@ function getDB(): Promise<IDBPDatabase> {
         }
         if (!db.objectStoreNames.contains(STORES.transfers)) {
           db.createObjectStore(STORES.transfers, { keyPath: 'id' }).createIndex('by-date', 'date')
+        }
+        if (!db.objectStoreNames.contains(STORES.incomePlans)) {
+          db.createObjectStore(STORES.incomePlans, { keyPath: 'id' })
         }
         if (!db.objectStoreNames.contains(STORES.images)) {
           db.createObjectStore(STORES.images, { keyPath: 'id' })
@@ -174,6 +179,7 @@ export interface Snapshot {
   usageLogs: UsageLog[]
   accounts: Account[]
   transfers: Transfer[]
+  incomePlans: IncomePlan[]
 }
 
 export async function exportSnapshot(): Promise<Snapshot> {
@@ -190,6 +196,7 @@ export async function exportSnapshot(): Promise<Snapshot> {
     usageLogs: await getAll<UsageLog>(STORES.usageLogs),
     accounts: await getAll<Account>(STORES.accounts),
     transfers: await getAll<Transfer>(STORES.transfers),
+    incomePlans: await getAll<IncomePlan>(STORES.incomePlans),
   }
 }
 
@@ -205,6 +212,7 @@ export async function importSnapshot(snap: Snapshot): Promise<void> {
     clearStore(STORES.usageLogs),
     clearStore(STORES.accounts),
     clearStore(STORES.transfers),
+    clearStore(STORES.incomePlans),
   ])
   await Promise.all([
     putMany(STORES.categories, snap.categories ?? []),
@@ -216,6 +224,7 @@ export async function importSnapshot(snap: Snapshot): Promise<void> {
     putMany(STORES.usageLogs, snap.usageLogs ?? []),
     putMany(STORES.accounts, snap.accounts ?? []),
     putMany(STORES.transfers, snap.transfers ?? []),
+    putMany(STORES.incomePlans, snap.incomePlans ?? []),
   ])
   if (snap.settings) await saveSettings(snap.settings)
 }

@@ -27,6 +27,7 @@ import {
   monthTotals,
   outstandingBills,
 } from '../../lib/money'
+import { paydayInfo } from '../../lib/plan'
 import { daysUntil, formatMoney, humanDue, formatDate, toISODate, todayISO } from '../../lib/format'
 
 type Range = 'day' | 'week' | 'month'
@@ -227,6 +228,33 @@ export default function HomeScreen() {
                 )}
               </div>
             </div>
+
+            {/* Payday */}
+            {(() => {
+              const pd = paydayInfo(app.incomePlans, now)
+              if (!pd) return null
+              const lbl = pd.daysUntil <= 0 ? 'Today' : pd.daysUntil === 1 ? 'Tomorrow' : `${pd.daysUntil} days`
+              return (
+                <button
+                  className="card card--pad row row--between"
+                  onClick={() => nav('/plan')}
+                  style={{ width: '100%', textAlign: 'left' }}
+                >
+                  <div className="row" style={{ gap: 12 }}>
+                    <div className="avatar hex" style={{ background: 'var(--accent-soft)', color: 'var(--warning)' }}>
+                      💸
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700 }}>Payday in {lbl}</div>
+                      <div className="muted" style={{ fontSize: 12 }}>
+                        {formatMoney(pd.plan.amount, currency, locale)} · {formatDate(pd.dateISO, locale)}
+                      </div>
+                    </div>
+                  </div>
+                  <IconChevron size={18} />
+                </button>
+              )
+            })()}
 
             {/* Due soon */}
             {dueSoon.length > 0 && (

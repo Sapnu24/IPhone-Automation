@@ -10,6 +10,7 @@ import {
   type Budget,
   type Category,
   type FocusSession,
+  type IncomePlan,
   type Settings,
   type Transaction,
   type Transfer,
@@ -28,6 +29,7 @@ interface AppValue {
   usageLogs: UsageLog[]
   accounts: Account[]
   transfers: Transfer[]
+  incomePlans: IncomePlan[]
 
   categoryById: (id: string) => Category | undefined
   accountById: (id: string) => Account | undefined
@@ -58,6 +60,10 @@ interface AppValue {
   addTransfer: (t: Omit<Transfer, 'id' | 'createdAt'>) => Promise<Transfer>
   deleteTransfer: (id: string) => Promise<void>
 
+  addIncomePlan: (p: Omit<IncomePlan, 'id' | 'createdAt'>) => Promise<IncomePlan>
+  updateIncomePlan: (p: IncomePlan) => Promise<void>
+  deleteIncomePlan: (id: string) => Promise<void>
+
   updateSettings: (patch: Partial<Settings>) => Promise<void>
   reloadAll: () => Promise<void>
 }
@@ -82,10 +88,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [usageLogs, setUsageLogs] = useState<UsageLog[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
   const [transfers, setTransfers] = useState<Transfer[]>([])
+  const [incomePlans, setIncomePlans] = useState<IncomePlan[]>([])
 
   async function reloadAll() {
     await db.ensureSeed()
-    const [s, cats, txns, bl, occ, bud, fs, ul, accts, trs] = await Promise.all([
+    const [s, cats, txns, bl, occ, bud, fs, ul, accts, trs, inc] = await Promise.all([
       db.getSettings(),
       db.getAll<Category>(STORES.categories),
       db.getAll<Transaction>(STORES.transactions),
@@ -96,6 +103,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       db.getAll<UsageLog>(STORES.usageLogs),
       db.getAll<Account>(STORES.accounts),
       db.getAll<Transfer>(STORES.transfers),
+      db.getAll<IncomePlan>(STORES.incomePlans),
     ])
     setSettings(s)
     setCategories(cats)
@@ -107,6 +115,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUsageLogs(ul)
     setAccounts(accts)
     setTransfers(trs)
+    setIncomePlans(inc)
   }
 
   useEffect(() => {
@@ -140,6 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     usageLogs,
     accounts,
     transfers,
+    incomePlans,
 
     categoryById: (id) => categories.find((c) => c.id === id),
     accountById: (id) => accounts.find((a) => a.id === id),
@@ -251,6 +261,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async deleteTransfer(id) {
       await db.remove(STORES.transfers, id)
       setTransfers((p) => p.filter((t) => t.id !== id))
+    },
+
+    async addIncomePlan(input) {
+      const p: IncomePlan = { ...input, id: uid(), createdAt: Date.now() }
+      await db.put(STORES.incomePlans, p)
+      setIncomePlans((prev) => [...prev, p])
+      return p
+    },
+    async updateIncomePlan(p) {
+      await db.put(STORES.incomePlans, p)
+      setIncomePlans((prev) => prev.map((x) => (x.id === p.id ? p : x)))
+    },
+    async deleteIncomePlan(id) {
+      await db.remove(STORES.incomePlans, id)
+      setIncomePlans((prev) => prev.filter((x) => x.id !== id))
     },
 
     async updateSettings(patch) {
