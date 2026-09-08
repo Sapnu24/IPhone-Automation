@@ -3,7 +3,6 @@ import { ScreenHeader } from '../../components/ui'
 import { IconChevron } from '../../components/Icons'
 
 const ACTIVE: { label: string; sub: string; icon: string; to: string }[] = [
-  { label: 'Chat with Buzz', sub: 'Log money or ask, in plain language', icon: '💬', to: '/chat' },
   { label: 'Plan', sub: 'Payday, income & payments due', icon: '📅', to: '/plan' },
   { label: 'Insights', sub: 'Charts, trends & breakdowns', icon: '📊', to: '/insights' },
   { label: 'Rewards', sub: 'Streaks & badges', icon: '🔥', to: '/rewards' },
