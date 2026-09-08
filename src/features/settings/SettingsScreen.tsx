@@ -4,6 +4,7 @@ import Sheet from '../../components/Sheet'
 import { ScreenHeader, SegmentedControl } from '../../components/ui'
 import { IconDownload, IconPlus, IconTrash, IconUpload, IconCalendar } from '../../components/Icons'
 import { exportBackup, downloadText, importBackupFile } from '../../lib/backup'
+import { transactionsToCSV, parseTransactionsCSV } from '../../lib/csv'
 import { icsForBills } from '../../lib/ics'
 import { wipeAll } from '../../lib/db'
 import { CURRENCIES } from '../../lib/currencies'
@@ -24,6 +25,7 @@ const PALETTE = [
 export default function SettingsScreen() {
   const app = useApp()
   const fileRef = useRef<HTMLInputElement>(null)
+  const csvRef = useRef<HTMLInputElement>(null)
   const [addCatOpen, setAddCatOpen] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
 
@@ -57,8 +59,46 @@ export default function SettingsScreen() {
     flash('Calendar file created — open it to add reminders.')
   }
 
+  function exportCSV() {
+    if (app.transactions.length === 0) {
+      flash('No transactions to export yet.')
+      return
+    }
+    const csv = transactionsToCSV(
+      app.transactions,
+      app.settings.currency,
+      (id) => app.categoryById(id)?.name ?? 'Other',
+      (id) => (id ? (app.accountById(id)?.name ?? '') : ''),
+    )
+    downloadText('hive-transactions.csv', csv, 'text/csv')
+    flash('Transactions exported (CSV).')
+  }
+
+  async function onImportCSV(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const text = await file.text()
+      const defAcct =
+        app.accounts.find((a) => !a.archived && /cash/i.test(a.name))?.id ??
+        app.accounts.find((a) => !a.archived)?.id
+      const txns = parseTransactionsCSV(text, app.categories, app.accounts, defAcct)
+      if (txns.length === 0) {
+        flash('No rows found in that CSV.')
+        return
+      }
+      for (const t of txns) {
+        await app.addTransaction({ kind: t.kind, amount: t.amount, categoryId: t.categoryId, accountId: t.accountId, note: t.note, date: t.date })
+      }
+      flash(`Imported ${txns.length} transaction(s).`)
+    } catch {
+      flash('Could not read that CSV.')
+    }
+  }
+
   async function resetAll() {
-    if (!window.confirm('Erase ALL Anchor data on this device? This cannot be undone.')) return
+    if (!window.confirm('Erase ALL Hive data on this device? This cannot be undone.')) return
     await wipeAll()
     await app.reloadAll()
     flash('All data cleared.')
@@ -152,6 +192,28 @@ export default function SettingsScreen() {
             </div>
           </div>
         </button>
+        <button className="list__row" onClick={exportCSV}>
+          <div className="avatar" style={{ background: 'var(--surface-3)' }}>
+            <IconDownload size={20} />
+          </div>
+          <div className="grow">
+            <div style={{ fontWeight: 600 }}>Export transactions (CSV)</div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              Open in Excel / Sheets
+            </div>
+          </div>
+        </button>
+        <button className="list__row" onClick={() => csvRef.current?.click()}>
+          <div className="avatar" style={{ background: 'var(--surface-3)' }}>
+            <IconUpload size={20} />
+          </div>
+          <div className="grow">
+            <div style={{ fontWeight: 600 }}>Import transactions (CSV)</div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              Same columns as the export
+            </div>
+          </div>
+        </button>
         <input
           ref={fileRef}
           type="file"
@@ -159,6 +221,7 @@ export default function SettingsScreen() {
           hidden
           onChange={onImportFile}
         />
+        <input ref={csvRef} type="file" accept="text/csv,.csv" hidden onChange={onImportCSV} />
       </div>
 
       <div className="section-label">Categories</div>
