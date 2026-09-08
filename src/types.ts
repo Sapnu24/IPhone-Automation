@@ -102,7 +102,7 @@ export interface Warranty {
 }
 
 export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string; group: AccountGroup }[] = [
-  { value: 'cash', label: 'Cash', icon: '👛', group: 'asset' },
+  { value: 'cash', label: 'Cash', icon: '💵', group: 'asset' },
   { value: 'ewallet', label: 'E-wallet', icon: '📱', group: 'asset' },
   { value: 'bank', label: 'Bank', icon: '🏦', group: 'asset' },
   { value: 'savings', label: 'Savings', icon: '🐷', group: 'asset' },
@@ -212,7 +212,7 @@ export function defaultAccounts(): Account[] {
       group: 'asset',
       currency: 'PHP',
       openingBalance: 0,
-      icon: '👛',
+      icon: '💵',
       color: 'var(--c-income)',
       createdAt: Date.now(),
     },
