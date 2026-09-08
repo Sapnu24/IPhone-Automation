@@ -624,6 +624,78 @@ p {
   border: 2px solid var(--bg-elev);
 }
 
+/* ---- Chat panel + popup ------------------------------------------------- */
+
+.chatpanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg-elev);
+}
+.chatpanel__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.chatpanel__msgs {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.chatpanel__composer {
+  flex: none;
+  padding: 8px 12px calc(env(safe-area-inset-bottom) + 8px);
+  border-top: 1px solid var(--border);
+  background: var(--bg-elev);
+}
+
+/* Full-page chat (direct /chat route): fill the viewport above the tab bar. */
+.chat-page {
+  height: calc(100dvh - var(--tabbar-h));
+  min-height: 0;
+}
+
+/* Popup chat window: slides up over the current screen. */
+.chat-pop-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 120;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fade 0.18s ease;
+}
+.chat-pop {
+  width: 100%;
+  max-width: var(--maxw);
+  height: min(82vh, 720px);
+  background: var(--bg-elev);
+  border-radius: 22px 22px 0 0;
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: chatpop-up 0.22s ease;
+}
+@keyframes chatpop-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 /* ---- Buzz turnaround (model sheet) ------------------------------------- */
 
 .turnaround {
