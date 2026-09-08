@@ -2,6 +2,7 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import { useApp } from '../../store'
 import Sheet from '../../components/Sheet'
 import { ScreenHeader, SegmentedControl } from '../../components/ui'
+import { BuzzTurnaround } from '../../components/Mascot'
 import { IconDownload, IconPlus, IconTrash, IconUpload, IconCalendar } from '../../components/Icons'
 import { exportBackup, downloadText, importBackupFile } from '../../lib/backup'
 import { transactionsToCSV, parseTransactionsCSV } from '../../lib/csv'
@@ -289,6 +290,15 @@ export default function SettingsScreen() {
         In <strong>Safari</strong>, tap the <strong>Share</strong> button, then{' '}
         <strong>Add to Home Screen</strong>. Hive will open full-screen with its own icon and work
         offline — your data stays on this device.
+      </div>
+
+      <div className="section-label">Meet Buzz</div>
+      <div className="card card--pad">
+        <BuzzTurnaround />
+        <div className="dim" style={{ fontSize: 13, lineHeight: 1.5, marginTop: 12 }}>
+          <strong>Buzz</strong> is Hive's little bookkeeper bee — cap on, always ready to help you
+          keep your money in order.
+        </div>
       </div>
 
       <div className="section-label">About</div>
