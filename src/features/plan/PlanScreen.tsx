@@ -111,7 +111,7 @@ export default function PlanScreen() {
             return (
               <div key={bill.id} className="card card--pad row">
                 <div className="avatar hex" style={{ background: cat?.color ?? 'var(--c-other)' }}>
-                  {cat?.icon ?? '📦'}
+                  {bill.icon ?? cat?.icon ?? '📦'}
                 </div>
                 <div className="grow" style={{ minWidth: 0 }}>
                   <div style={{ fontWeight: 700 }}>{bill.name}</div>

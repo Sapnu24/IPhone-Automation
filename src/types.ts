@@ -117,6 +117,7 @@ export interface Bill {
   name: string
   amount: number
   categoryId: string
+  icon?: string // optional emoji shown instead of the category icon
   dueDate: string // anchor due date, local ISO 'YYYY-MM-DD'
   recurrence: Recurrence
   reminderDaysBefore: number
@@ -124,6 +125,36 @@ export interface Bill {
   createdAt: number
   archived?: boolean
 }
+
+/** Quick-add presets for common subscriptions & bills. Amounts are typical
+ *  PH monthly prices — just a starting point the user can edit. */
+export interface SubscriptionPreset {
+  name: string
+  icon: string
+  categoryId: string
+  amount?: number
+}
+export const SUBSCRIPTION_PRESETS: SubscriptionPreset[] = [
+  { name: 'Netflix', icon: '🎬', categoryId: 'cat-subs', amount: 549 },
+  { name: 'Spotify', icon: '🎵', categoryId: 'cat-subs', amount: 149 },
+  { name: 'YouTube Premium', icon: '▶️', categoryId: 'cat-subs', amount: 179 },
+  { name: 'HBO Max', icon: '📺', categoryId: 'cat-subs', amount: 299 },
+  { name: 'Disney+', icon: '🏰', categoryId: 'cat-subs', amount: 159 },
+  { name: 'Prime Video', icon: '📦', categoryId: 'cat-subs', amount: 149 },
+  { name: 'Canva', icon: '🎨', categoryId: 'cat-subs', amount: 149 },
+  { name: 'Claude', icon: '🤖', categoryId: 'cat-subs', amount: 1150 },
+  { name: 'ChatGPT Plus', icon: '💬', categoryId: 'cat-subs', amount: 1150 },
+  { name: 'Apple iCloud+', icon: '☁️', categoryId: 'cat-subs', amount: 49 },
+  { name: 'Apple Music', icon: '🎧', categoryId: 'cat-subs', amount: 149 },
+  { name: 'Microsoft 365', icon: '🪟', categoryId: 'cat-subs', amount: 399 },
+  { name: 'Google One', icon: '🔷', categoryId: 'cat-subs', amount: 89 },
+  { name: 'iQIYI', icon: '🎞️', categoryId: 'cat-subs', amount: 129 },
+  { name: 'Viu', icon: '📱', categoryId: 'cat-subs', amount: 149 },
+  { name: 'Globe', icon: '📶', categoryId: 'cat-utilities', amount: 999 },
+  { name: 'Smart', icon: '📲', categoryId: 'cat-utilities', amount: 999 },
+  { name: 'Converge', icon: '🌐', categoryId: 'cat-utilities', amount: 1500 },
+  { name: 'PLDT Home', icon: '🏠', categoryId: 'cat-utilities', amount: 1699 },
+]
 
 /** A record that a specific occurrence of a bill (identified by its due date)
  *  has been paid. Absence of a record means that occurrence is still due. */

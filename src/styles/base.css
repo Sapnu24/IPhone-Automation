@@ -624,6 +624,31 @@ p {
   border: 2px solid var(--bg-elev);
 }
 
+/* ---- Subscription preset chips ----------------------------------------- */
+
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.preset-chip.is-on {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 /* ---- Chat panel + popup ------------------------------------------------- */
 
 .chatpanel {

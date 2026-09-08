@@ -188,7 +188,7 @@ function BillsList({ onEdit }: { onEdit: (b: Bill) => void }) {
           <div key={bill.id} className="card card--pad">
             <div className="row" style={{ alignItems: 'flex-start' }}>
               <div className="avatar" style={{ background: cat?.color ?? 'var(--c-other)' }}>
-                {cat?.icon ?? '📦'}
+                {bill.icon ?? cat?.icon ?? '📦'}
               </div>
               <button
                 className="grow"

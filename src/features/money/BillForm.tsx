@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../store'
 import { todayISO } from '../../lib/format'
 import { CategoryChips, SegmentedControl } from '../../components/ui'
-import type { Bill, Recurrence } from '../../types'
+import { SUBSCRIPTION_PRESETS, type Bill, type Recurrence, type SubscriptionPreset } from '../../types'
 
 interface Props {
   initial?: Bill
@@ -16,6 +16,7 @@ export default function BillForm({ initial, onDone }: Props) {
   const expenseCats = app.categories.filter((c) => c.kind === 'expense' && !c.archived)
 
   const [name, setName] = useState(initial?.name ?? '')
+  const [icon, setIcon] = useState(initial?.icon ?? '')
   const [amount, setAmount] = useState(initial ? String(initial.amount) : '')
   const [categoryId, setCategoryId] = useState(
     initial?.categoryId ?? expenseCats.find((c) => c.id === 'cat-utilities')?.id ?? expenseCats[0]?.id ?? '',
@@ -25,6 +26,14 @@ export default function BillForm({ initial, onDone }: Props) {
   const [reminderDaysBefore, setReminder] = useState(initial?.reminderDaysBefore ?? 2)
   const [autopay, setAutopay] = useState(initial?.autopay ?? false)
 
+  function applyPreset(p: SubscriptionPreset) {
+    setName(p.name)
+    setIcon(p.icon)
+    if (expenseCats.some((c) => c.id === p.categoryId)) setCategoryId(p.categoryId)
+    if (p.amount != null && !amount.trim()) setAmount(String(p.amount))
+    setRecurrence('monthly')
+  }
+
   const value = parseFloat(amount)
   const valid = name.trim() && !Number.isNaN(value) && value > 0 && categoryId && dueDate
 
@@ -32,6 +41,7 @@ export default function BillForm({ initial, onDone }: Props) {
     if (!valid) return
     const data = {
       name: name.trim(),
+      icon: icon.trim() || undefined,
       amount: Math.round(value * 100) / 100,
       categoryId,
       dueDate,
@@ -46,16 +56,43 @@ export default function BillForm({ initial, onDone }: Props) {
 
   return (
     <div className="stack">
+      {!initial && (
+        <div className="field">
+          <label className="field__label">Popular subscriptions</label>
+          <div className="preset-row">
+            {SUBSCRIPTION_PRESETS.map((p) => (
+              <button
+                key={p.name}
+                type="button"
+                className={`preset-chip${name === p.name ? ' is-on' : ''}`}
+                onClick={() => applyPreset(p)}
+              >
+                <span style={{ fontSize: 16 }}>{p.icon}</span> {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="field">
         <label className="field__label">Bill name</label>
-        <input
-          className="input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Rent, Netflix, Electricity…"
-          maxLength={60}
-          autoFocus
-        />
+        <div className="row" style={{ gap: 8 }}>
+          <input
+            className="input"
+            style={{ width: 60, textAlign: 'center', fontSize: 22, flex: 'none' }}
+            value={icon}
+            onChange={(e) => setIcon(e.target.value.slice(0, 2))}
+            placeholder="🔁"
+            aria-label="Bill emoji"
+          />
+          <input
+            className="input grow"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Rent, Netflix, Electricity…"
+            maxLength={60}
+          />
+        </div>
       </div>
 
       <div className="field">
@@ -120,7 +157,7 @@ export default function BillForm({ initial, onDone }: Props) {
         <div>
           <div style={{ fontWeight: 700 }}>Autopay is on</div>
           <div className="muted" style={{ fontSize: 12 }}>
-            Just a reminder — Anchor won't move money.
+            Just a reminder — Hive won't move money.
           </div>
         </div>
         <input
