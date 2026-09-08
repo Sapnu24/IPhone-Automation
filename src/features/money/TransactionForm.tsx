@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../../store'
 import { todayISO } from '../../lib/format'
+import { applyKey, evalExpr } from '../../lib/calc'
+import CalcPad from '../../components/CalcPad'
 import { CategoryChips, SegmentedControl } from '../../components/ui'
 import { IconCamera, IconClose } from '../../components/Icons'
 import { resizeImage } from '../../lib/image'
@@ -17,7 +19,7 @@ interface Props {
 export default function TransactionForm({ initial, onDone }: Props) {
   const app = useApp()
   const [kind, setKind] = useState<TxnKind>(initial?.kind ?? 'expense')
-  const [amount, setAmount] = useState(initial ? String(initial.amount) : '')
+  const [expr, setExpr] = useState(initial ? String(initial.amount) : '')
   const [note, setNote] = useState(initial?.note ?? '')
   const [date, setDate] = useState(initial?.date ?? todayISO())
   const activeAccounts = app.accounts.filter((a) => !a.archived)
@@ -77,7 +79,7 @@ export default function TransactionForm({ initial, onDone }: Props) {
       })
       const filled: string[] = []
       if (res.amount) {
-        setAmount((prev) => prev || String(res.amount))
+        setExpr((prev) => prev || String(res.amount))
         filled.push('amount')
       }
       if (res.date) {
@@ -107,8 +109,8 @@ export default function TransactionForm({ initial, onDone }: Props) {
     setScanMsg(null)
   }
 
-  const value = parseFloat(amount)
-  const valid = !Number.isNaN(value) && value > 0 && validCat
+  const value = evalExpr(expr)
+  const valid = value > 0 && !!validCat
 
   async function submit() {
     if (!valid) return
@@ -194,15 +196,11 @@ export default function TransactionForm({ initial, onDone }: Props) {
 
       <div className="field">
         <label className="field__label">Amount ({app.settings.currency})</label>
-        <input
-          className="input"
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+        <CalcPad
+          expr={expr}
+          onKey={(k) => setExpr((e) => applyKey(e, k))}
+          currency={app.settings.currency}
+          locale={app.settings.locale}
         />
       </div>
 
