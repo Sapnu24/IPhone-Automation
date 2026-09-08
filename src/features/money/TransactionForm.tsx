@@ -20,6 +20,10 @@ export default function TransactionForm({ initial, onDone }: Props) {
   const [amount, setAmount] = useState(initial ? String(initial.amount) : '')
   const [note, setNote] = useState(initial?.note ?? '')
   const [date, setDate] = useState(initial?.date ?? todayISO())
+  const activeAccounts = app.accounts.filter((a) => !a.archived)
+  const [accountId, setAccountId] = useState(
+    initial?.accountId ?? activeAccounts[0]?.id ?? '',
+  )
 
   const cats = app.categories.filter((c) => c.kind === kind && !c.archived)
   const [categoryId, setCategoryId] = useState(
@@ -112,6 +116,7 @@ export default function TransactionForm({ initial, onDone }: Props) {
       kind,
       amount: Math.round(value * 100) / 100,
       categoryId: validCat,
+      accountId: accountId || undefined,
       note: note.trim() || undefined,
       date,
       receiptImageId: receiptId,
@@ -205,6 +210,19 @@ export default function TransactionForm({ initial, onDone }: Props) {
         <label className="field__label">Category</label>
         <CategoryChips categories={cats} selectedId={validCat} onSelect={setCategoryId} />
       </div>
+
+      {activeAccounts.length > 0 && (
+        <div className="field">
+          <label className="field__label">Account</label>
+          <select className="select" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+            {activeAccounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.icon} {a.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="field">
         <label className="field__label">Note (optional)</label>

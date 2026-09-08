@@ -33,7 +33,7 @@ async function launch() {
 
 const SEED = `(${async () => {
   const db = await new Promise((res, rej) => {
-    const r = indexedDB.open('anchor', 1)
+    const r = indexedDB.open('anchor')
     r.onsuccess = () => res(r.result)
     r.onerror = () => rej(r.error)
   })
@@ -80,6 +80,10 @@ const SEED = `(${async () => {
   await fs('f9', -5, 9, 25); await fs('f10', -6, 20, 25)
   await put('usageLogs', { id: 'u1', date: d(0), label: 'Instagram', minutes: 45, createdAt: now })
   await put('usageLogs', { id: 'u2', date: d(0), label: 'YouTube', minutes: 30, createdAt: now })
+  await put('accounts', { id: 'acct-gcash', name: 'GCash', type: 'ewallet', group: 'asset', currency: 'PHP', openingBalance: 5700, icon: '📱', color: 'var(--c-housing)', createdAt: now })
+  await put('accounts', { id: 'acct-bpi', name: 'BPI Savings', type: 'savings', group: 'asset', currency: 'PHP', openingBalance: 22450, icon: '🏦', color: 'var(--c-fun)', createdAt: now })
+  await put('accounts', { id: 'acct-card', name: 'BDO Mastercard', type: 'card', group: 'liability', currency: 'PHP', openingBalance: -4200, icon: '💳', color: 'var(--c-shopping)', createdAt: now })
+  await put('accounts', { id: 'acct-usd', name: 'Wise USD', type: 'bank', group: 'asset', currency: 'USD', openingBalance: 420, icon: '💵', color: 'var(--c-health)', createdAt: now })
 }})()`
 
 const browser = await launch()
@@ -109,30 +113,35 @@ await page.waitForSelector('.tabbar', { timeout: 15000 })
 
 await shot('01-home-light')
 
+await page.getByRole('link', { name: 'Wallet' }).click()
+await shot('02-wallet')
+
 await page.getByRole('link', { name: 'Money' }).click()
 await page.getByRole('tab', { name: 'Spending' }).click()
-await shot('02-money-spending')
+await shot('03-money-spending')
 await page.getByRole('tab', { name: 'Bills' }).click()
-await shot('03-money-bills')
+await shot('04-money-bills')
 await page.getByRole('tab', { name: 'Budgets' }).click()
-await shot('04-money-budgets')
+await shot('05-money-budgets')
 
 await page.getByRole('link', { name: 'Focus' }).click()
-await shot('05-focus')
+await shot('06-focus')
 
-await page.getByRole('link', { name: 'Insights' }).click()
-await shot('06-insights')
-await page.screenshot({ path: `${outDir}/07-insights-full.png`, fullPage: true })
+await page.getByRole('link', { name: 'More' }).click()
+await shot('07-more')
+await page.getByRole('button', { name: /Insights/ }).click()
+await shot('08-insights')
 
-await page.getByRole('link', { name: 'Settings' }).click()
-await shot('08-settings')
+await page.getByRole('link', { name: 'More' }).click()
+await page.getByRole('button', { name: /Settings/ }).click()
+await shot('09-settings')
 
 // Dark mode
 await page.getByRole('tab', { name: 'Dark' }).click()
 await page.getByRole('link', { name: 'Home' }).click()
-await shot('09-home-dark')
-await page.getByRole('link', { name: 'Insights' }).click()
-await shot('10-insights-dark')
+await shot('10-home-dark')
+await page.getByRole('link', { name: 'Wallet' }).click()
+await shot('11-wallet-dark')
 
 console.log('PAGE ERRORS:', errors.length ? errors : 'none')
 await browser.close()

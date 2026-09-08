@@ -18,11 +18,47 @@ export interface Transaction {
   kind: TxnKind
   amount: number // positive number in the app's currency
   categoryId: string
+  accountId?: string // which wallet/account this moved through
   note?: string
   date: string // local ISO date 'YYYY-MM-DD'
   createdAt: number
   receiptImageId?: string
 }
+
+export type AccountType = 'cash' | 'ewallet' | 'bank' | 'savings' | 'card' | 'other'
+export type AccountGroup = 'asset' | 'liability'
+
+export interface Account {
+  id: string
+  name: string
+  type: AccountType
+  group: AccountGroup
+  currency: string
+  openingBalance: number
+  icon: string
+  color: string
+  archived?: boolean
+  createdAt: number
+}
+
+export interface Transfer {
+  id: string
+  fromAccountId: string
+  toAccountId: string
+  amount: number
+  date: string
+  note?: string
+  createdAt: number
+}
+
+export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string; group: AccountGroup }[] = [
+  { value: 'cash', label: 'Cash', icon: '👛', group: 'asset' },
+  { value: 'ewallet', label: 'E-wallet', icon: '📱', group: 'asset' },
+  { value: 'bank', label: 'Bank', icon: '🏦', group: 'asset' },
+  { value: 'savings', label: 'Savings', icon: '🐷', group: 'asset' },
+  { value: 'card', label: 'Credit card', icon: '💳', group: 'liability' },
+  { value: 'other', label: 'Other', icon: '📦', group: 'asset' },
+]
 
 export type Recurrence = 'none' | 'weekly' | 'monthly' | 'yearly'
 
@@ -114,6 +150,22 @@ export function defaultCategories(): Category[] {
     { id: 'cat-fun', name: 'Fun & Dining', icon: '🎉', color: 'var(--c-fun)', kind: 'expense' },
     { id: 'cat-other', name: 'Other', icon: '📦', color: 'var(--c-other)', kind: 'expense' },
     { id: 'cat-income', name: 'Income', icon: '💰', color: 'var(--c-income)', kind: 'income' },
+  ]
+}
+
+export function defaultAccounts(): Account[] {
+  return [
+    {
+      id: 'acct-cash',
+      name: 'Cash',
+      type: 'cash',
+      group: 'asset',
+      currency: 'PHP',
+      openingBalance: 0,
+      icon: '👛',
+      color: 'var(--c-income)',
+      createdAt: Date.now(),
+    },
   ]
 }
 

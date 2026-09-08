@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { IconChart, IconGear, IconHome, IconTimer, IconWallet } from './Icons'
+import { IconGrid, IconHome, IconReceipt, IconTimer, IconWallet } from './Icons'
 
 const tabs = [
   { to: '/', label: 'Home', Icon: IconHome, end: true },
-  { to: '/money', label: 'Money', Icon: IconWallet, end: false },
+  { to: '/wallet', label: 'Wallet', Icon: IconWallet, end: false },
+  { to: '/money', label: 'Money', Icon: IconReceipt, end: false },
   { to: '/focus', label: 'Focus', Icon: IconTimer, end: false },
-  { to: '/insights', label: 'Insights', Icon: IconChart, end: false },
-  { to: '/settings', label: 'Settings', Icon: IconGear, end: false },
+  { to: '/more', label: 'More', Icon: IconGrid, end: false },
 ]
 
 export default function TabBar() {

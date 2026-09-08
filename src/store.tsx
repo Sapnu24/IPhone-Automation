@@ -4,6 +4,7 @@ import { STORES } from './lib/db'
 import { uid } from './lib/id'
 import {
   defaultSettings,
+  type Account,
   type Bill,
   type BillOccurrence,
   type Budget,
@@ -11,6 +12,7 @@ import {
   type FocusSession,
   type Settings,
   type Transaction,
+  type Transfer,
   type UsageLog,
 } from './types'
 
@@ -24,8 +26,11 @@ interface AppValue {
   budgets: Budget[]
   focusSessions: FocusSession[]
   usageLogs: UsageLog[]
+  accounts: Account[]
+  transfers: Transfer[]
 
   categoryById: (id: string) => Category | undefined
+  accountById: (id: string) => Account | undefined
 
   addTransaction: (t: Omit<Transaction, 'id' | 'createdAt'>) => Promise<Transaction>
   updateTransaction: (t: Transaction) => Promise<void>
@@ -46,6 +51,12 @@ interface AppValue {
   addFocusSession: (f: Omit<FocusSession, 'id'>) => Promise<FocusSession>
   addUsageLog: (u: Omit<UsageLog, 'id' | 'createdAt'>) => Promise<UsageLog>
   deleteUsageLog: (id: string) => Promise<void>
+
+  addAccount: (a: Omit<Account, 'id' | 'createdAt'>) => Promise<Account>
+  updateAccount: (a: Account) => Promise<void>
+  deleteAccount: (id: string) => Promise<void>
+  addTransfer: (t: Omit<Transfer, 'id' | 'createdAt'>) => Promise<Transfer>
+  deleteTransfer: (id: string) => Promise<void>
 
   updateSettings: (patch: Partial<Settings>) => Promise<void>
   reloadAll: () => Promise<void>
@@ -69,10 +80,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [focusSessions, setFocusSessions] = useState<FocusSession[]>([])
   const [usageLogs, setUsageLogs] = useState<UsageLog[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [transfers, setTransfers] = useState<Transfer[]>([])
 
   async function reloadAll() {
     await db.ensureSeed()
-    const [s, cats, txns, bl, occ, bud, fs, ul] = await Promise.all([
+    const [s, cats, txns, bl, occ, bud, fs, ul, accts, trs] = await Promise.all([
       db.getSettings(),
       db.getAll<Category>(STORES.categories),
       db.getAll<Transaction>(STORES.transactions),
@@ -81,6 +94,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       db.getAll<Budget>(STORES.budgets),
       db.getAll<FocusSession>(STORES.focusSessions),
       db.getAll<UsageLog>(STORES.usageLogs),
+      db.getAll<Account>(STORES.accounts),
+      db.getAll<Transfer>(STORES.transfers),
     ])
     setSettings(s)
     setCategories(cats)
@@ -90,6 +105,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBudgets(bud)
     setFocusSessions(fs)
     setUsageLogs(ul)
+    setAccounts(accts)
+    setTransfers(trs)
   }
 
   useEffect(() => {
@@ -121,8 +138,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     budgets,
     focusSessions,
     usageLogs,
+    accounts,
+    transfers,
 
     categoryById: (id) => categories.find((c) => c.id === id),
+    accountById: (id) => accounts.find((a) => a.id === id),
 
     async addTransaction(input) {
       const t: Transaction = { ...input, id: uid(), createdAt: Date.now() }
@@ -206,6 +226,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async deleteUsageLog(id) {
       await db.remove(STORES.usageLogs, id)
       setUsageLogs((p) => p.filter((u) => u.id !== id))
+    },
+
+    async addAccount(input) {
+      const a: Account = { ...input, id: uid(), createdAt: Date.now() }
+      await db.put(STORES.accounts, a)
+      setAccounts((p) => [...p, a])
+      return a
+    },
+    async updateAccount(a) {
+      await db.put(STORES.accounts, a)
+      setAccounts((p) => p.map((x) => (x.id === a.id ? a : x)))
+    },
+    async deleteAccount(id) {
+      await db.remove(STORES.accounts, id)
+      setAccounts((p) => p.filter((a) => a.id !== id))
+    },
+    async addTransfer(input) {
+      const t: Transfer = { ...input, id: uid(), createdAt: Date.now() }
+      await db.put(STORES.transfers, t)
+      setTransfers((p) => [t, ...p])
+      return t
+    },
+    async deleteTransfer(id) {
+      await db.remove(STORES.transfers, id)
+      setTransfers((p) => p.filter((t) => t.id !== id))
     },
 
     async updateSettings(patch) {

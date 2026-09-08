@@ -1,7 +1,9 @@
 import { openDB, type IDBPDatabase } from 'idb'
 import {
+  defaultAccounts,
   defaultCategories,
   defaultSettings,
+  type Account,
   type Bill,
   type BillOccurrence,
   type Budget,
@@ -9,11 +11,12 @@ import {
   type FocusSession,
   type Settings,
   type Transaction,
+  type Transfer,
   type UsageLog,
 } from '../types'
 
 const DB_NAME = 'anchor'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 export const STORES = {
   transactions: 'transactions',
@@ -23,6 +26,8 @@ export const STORES = {
   categories: 'categories',
   focusSessions: 'focusSessions',
   usageLogs: 'usageLogs',
+  accounts: 'accounts',
+  transfers: 'transfers',
   images: 'images',
   meta: 'meta',
 } as const
@@ -34,26 +39,42 @@ let dbp: Promise<IDBPDatabase> | null = null
 function getDB(): Promise<IDBPDatabase> {
   if (!dbp) {
     dbp = openDB(DB_NAME, DB_VERSION, {
+      // Idempotent: create each store only if missing, so migrating from an
+      // older version simply adds the new stores without touching data.
       upgrade(db) {
-        const txns = db.createObjectStore(STORES.transactions, { keyPath: 'id' })
-        txns.createIndex('by-date', 'date')
-
-        db.createObjectStore(STORES.bills, { keyPath: 'id' })
-
-        const occ = db.createObjectStore(STORES.billOccurrences, { keyPath: 'id' })
-        occ.createIndex('by-bill', 'billId')
-
-        db.createObjectStore(STORES.budgets, { keyPath: 'id' })
-        db.createObjectStore(STORES.categories, { keyPath: 'id' })
-
-        const focus = db.createObjectStore(STORES.focusSessions, { keyPath: 'id' })
-        focus.createIndex('by-start', 'startedAt')
-
-        const usage = db.createObjectStore(STORES.usageLogs, { keyPath: 'id' })
-        usage.createIndex('by-date', 'date')
-
-        db.createObjectStore(STORES.images, { keyPath: 'id' })
-        db.createObjectStore(STORES.meta) // out-of-line keys: 'settings', 'seeded'
+        if (!db.objectStoreNames.contains(STORES.transactions)) {
+          db.createObjectStore(STORES.transactions, { keyPath: 'id' }).createIndex('by-date', 'date')
+        }
+        if (!db.objectStoreNames.contains(STORES.bills)) {
+          db.createObjectStore(STORES.bills, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.billOccurrences)) {
+          db.createObjectStore(STORES.billOccurrences, { keyPath: 'id' }).createIndex('by-bill', 'billId')
+        }
+        if (!db.objectStoreNames.contains(STORES.budgets)) {
+          db.createObjectStore(STORES.budgets, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.categories)) {
+          db.createObjectStore(STORES.categories, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.focusSessions)) {
+          db.createObjectStore(STORES.focusSessions, { keyPath: 'id' }).createIndex('by-start', 'startedAt')
+        }
+        if (!db.objectStoreNames.contains(STORES.usageLogs)) {
+          db.createObjectStore(STORES.usageLogs, { keyPath: 'id' }).createIndex('by-date', 'date')
+        }
+        if (!db.objectStoreNames.contains(STORES.accounts)) {
+          db.createObjectStore(STORES.accounts, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.transfers)) {
+          db.createObjectStore(STORES.transfers, { keyPath: 'id' }).createIndex('by-date', 'date')
+        }
+        if (!db.objectStoreNames.contains(STORES.images)) {
+          db.createObjectStore(STORES.images, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.meta)) {
+          db.createObjectStore(STORES.meta) // out-of-line keys: 'settings', 'seeded'
+        }
       },
     })
   }
@@ -111,13 +132,20 @@ export async function saveSettings(s: Settings): Promise<Settings> {
 export async function ensureSeed(): Promise<void> {
   const db = await getDB()
   const seeded = await db.get(STORES.meta, 'seeded')
-  if (seeded) return
-  const tx = db.transaction([STORES.categories, STORES.meta], 'readwrite')
-  for (const c of defaultCategories()) await tx.objectStore(STORES.categories).put(c)
-  const existing = await tx.objectStore(STORES.meta).get('settings')
-  if (!existing) await tx.objectStore(STORES.meta).put(defaultSettings(), 'settings')
-  await tx.objectStore(STORES.meta).put(true, 'seeded')
-  await tx.done
+  if (!seeded) {
+    const tx = db.transaction([STORES.categories, STORES.meta], 'readwrite')
+    for (const c of defaultCategories()) await tx.objectStore(STORES.categories).put(c)
+    const existing = await tx.objectStore(STORES.meta).get('settings')
+    if (!existing) await tx.objectStore(STORES.meta).put(defaultSettings(), 'settings')
+    await tx.objectStore(STORES.meta).put(true, 'seeded')
+    await tx.done
+  }
+  // Ensure at least one account exists (also seeds users upgrading from v1).
+  if ((await db.count(STORES.accounts)) === 0) {
+    const tx = db.transaction(STORES.accounts, 'readwrite')
+    for (const a of defaultAccounts()) await tx.store.put(a)
+    await tx.done
+  }
 }
 
 // ---- Receipt images (blobs) --------------------------------------------
@@ -144,6 +172,8 @@ export interface Snapshot {
   budgets: Budget[]
   focusSessions: FocusSession[]
   usageLogs: UsageLog[]
+  accounts: Account[]
+  transfers: Transfer[]
 }
 
 export async function exportSnapshot(): Promise<Snapshot> {
@@ -158,6 +188,8 @@ export async function exportSnapshot(): Promise<Snapshot> {
     budgets: await getAll<Budget>(STORES.budgets),
     focusSessions: await getAll<FocusSession>(STORES.focusSessions),
     usageLogs: await getAll<UsageLog>(STORES.usageLogs),
+    accounts: await getAll<Account>(STORES.accounts),
+    transfers: await getAll<Transfer>(STORES.transfers),
   }
 }
 
@@ -171,6 +203,8 @@ export async function importSnapshot(snap: Snapshot): Promise<void> {
     clearStore(STORES.budgets),
     clearStore(STORES.focusSessions),
     clearStore(STORES.usageLogs),
+    clearStore(STORES.accounts),
+    clearStore(STORES.transfers),
   ])
   await Promise.all([
     putMany(STORES.categories, snap.categories ?? []),
@@ -180,6 +214,8 @@ export async function importSnapshot(snap: Snapshot): Promise<void> {
     putMany(STORES.budgets, snap.budgets ?? []),
     putMany(STORES.focusSessions, snap.focusSessions ?? []),
     putMany(STORES.usageLogs, snap.usageLogs ?? []),
+    putMany(STORES.accounts, snap.accounts ?? []),
+    putMany(STORES.transfers, snap.transfers ?? []),
   ])
   if (snap.settings) await saveSettings(snap.settings)
 }

@@ -124,6 +124,28 @@ export const IconDownload = ({ size, className }: P) => (
   </svg>
 )
 
+export const IconReceipt = ({ size, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" />
+    <path d="M9 8h6M9 12h6" />
+  </svg>
+)
+
+export const IconGrid = ({ size, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="4" y="4" width="7" height="7" rx="2" />
+    <rect x="13" y="4" width="7" height="7" rx="2" />
+    <rect x="4" y="13" width="7" height="7" rx="2" />
+    <rect x="13" y="13" width="7" height="7" rx="2" />
+  </svg>
+)
+
+export const IconSwap = ({ size, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M4 8h13l-3-3M20 16H7l3 3" />
+  </svg>
+)
+
 export const IconCamera = ({ size, className }: P) => (
   <svg {...base(size)} className={className}>
     <path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.2l1-1.6A1 1 0 0 1 8.5 4h7a1 1 0 0 1 .8.4L17.3 6h1.2A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5Z" />
