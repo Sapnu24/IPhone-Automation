@@ -6,13 +6,13 @@ const ACTIVE: { label: string; sub: string; icon: string; to: string }[] = [
   { label: 'Chat with Buzz', sub: 'Log money or ask, in plain language', icon: '💬', to: '/chat' },
   { label: 'Plan', sub: 'Payday, income & payments due', icon: '📅', to: '/plan' },
   { label: 'Insights', sub: 'Charts, trends & breakdowns', icon: '📊', to: '/insights' },
+  { label: 'Debt', sub: 'Track what you owe', icon: '💳', to: '/debt' },
+  { label: 'Owed to you', sub: 'IOUs & split bills', icon: '🤝', to: '/owed' },
+  { label: 'Notes', sub: 'Quick money notes', icon: '📝', to: '/notes' },
   { label: 'Settings', sub: 'Currency, theme, backup, data', icon: '⚙️', to: '/settings' },
 ]
 
 const SOON = [
-  { label: 'Debt', sub: 'Track what you owe', icon: '💳' },
-  { label: 'Owed to you', sub: 'IOUs & split bills', icon: '🤝' },
-  { label: 'Notes', sub: 'Quick money notes', icon: '📝' },
   { label: 'Tools', sub: 'Currency, tax, shopping list…', icon: '🛠️' },
   { label: 'Coach', sub: 'Bite-size financial literacy', icon: '🎓' },
 ]

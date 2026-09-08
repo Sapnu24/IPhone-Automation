@@ -63,6 +63,27 @@ export interface IncomePlan {
   archived?: boolean
 }
 
+export type LedgerDirection = 'debt' | 'owed' // money you owe / money owed to you
+
+export interface Ledger {
+  id: string
+  direction: LedgerDirection
+  person: string
+  amount: number
+  settledAmount: number
+  note?: string
+  dueDate?: string
+  createdAt: number
+}
+
+export interface Note {
+  id: string
+  text: string
+  pinned?: boolean
+  createdAt: number
+  updatedAt: number
+}
+
 export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string; group: AccountGroup }[] = [
   { value: 'cash', label: 'Cash', icon: '👛', group: 'asset' },
   { value: 'ewallet', label: 'E-wallet', icon: '📱', group: 'asset' },

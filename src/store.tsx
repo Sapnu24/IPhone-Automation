@@ -11,6 +11,8 @@ import {
   type Category,
   type FocusSession,
   type IncomePlan,
+  type Ledger,
+  type Note,
   type Settings,
   type Transaction,
   type Transfer,
@@ -30,6 +32,8 @@ interface AppValue {
   accounts: Account[]
   transfers: Transfer[]
   incomePlans: IncomePlan[]
+  ledgers: Ledger[]
+  notes: Note[]
 
   categoryById: (id: string) => Category | undefined
   accountById: (id: string) => Account | undefined
@@ -64,6 +68,14 @@ interface AppValue {
   updateIncomePlan: (p: IncomePlan) => Promise<void>
   deleteIncomePlan: (id: string) => Promise<void>
 
+  addLedger: (l: Omit<Ledger, 'id' | 'createdAt'>) => Promise<Ledger>
+  updateLedger: (l: Ledger) => Promise<void>
+  deleteLedger: (id: string) => Promise<void>
+
+  addNote: (text: string) => Promise<Note>
+  updateNote: (n: Note) => Promise<void>
+  deleteNote: (id: string) => Promise<void>
+
   updateSettings: (patch: Partial<Settings>) => Promise<void>
   reloadAll: () => Promise<void>
 }
@@ -89,10 +101,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [transfers, setTransfers] = useState<Transfer[]>([])
   const [incomePlans, setIncomePlans] = useState<IncomePlan[]>([])
+  const [ledgers, setLedgers] = useState<Ledger[]>([])
+  const [notes, setNotes] = useState<Note[]>([])
 
   async function reloadAll() {
     await db.ensureSeed()
-    const [s, cats, txns, bl, occ, bud, fs, ul, accts, trs, inc] = await Promise.all([
+    const [s, cats, txns, bl, occ, bud, fs, ul, accts, trs, inc, led, nts] = await Promise.all([
       db.getSettings(),
       db.getAll<Category>(STORES.categories),
       db.getAll<Transaction>(STORES.transactions),
@@ -104,6 +118,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       db.getAll<Account>(STORES.accounts),
       db.getAll<Transfer>(STORES.transfers),
       db.getAll<IncomePlan>(STORES.incomePlans),
+      db.getAll<Ledger>(STORES.ledgers),
+      db.getAll<Note>(STORES.notes),
     ])
     setSettings(s)
     setCategories(cats)
@@ -116,6 +132,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAccounts(accts)
     setTransfers(trs)
     setIncomePlans(inc)
+    setLedgers(led)
+    setNotes(nts)
   }
 
   useEffect(() => {
@@ -150,6 +168,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     accounts,
     transfers,
     incomePlans,
+    ledgers,
+    notes,
 
     categoryById: (id) => categories.find((c) => c.id === id),
     accountById: (id) => accounts.find((a) => a.id === id),
@@ -276,6 +296,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async deleteIncomePlan(id) {
       await db.remove(STORES.incomePlans, id)
       setIncomePlans((prev) => prev.filter((x) => x.id !== id))
+    },
+
+    async addLedger(input) {
+      const l: Ledger = { ...input, id: uid(), createdAt: Date.now() }
+      await db.put(STORES.ledgers, l)
+      setLedgers((prev) => [...prev, l])
+      return l
+    },
+    async updateLedger(l) {
+      await db.put(STORES.ledgers, l)
+      setLedgers((prev) => prev.map((x) => (x.id === l.id ? l : x)))
+    },
+    async deleteLedger(id) {
+      await db.remove(STORES.ledgers, id)
+      setLedgers((prev) => prev.filter((x) => x.id !== id))
+    },
+
+    async addNote(text) {
+      const n: Note = { id: uid(), text, createdAt: Date.now(), updatedAt: Date.now() }
+      await db.put(STORES.notes, n)
+      setNotes((prev) => [n, ...prev])
+      return n
+    },
+    async updateNote(n) {
+      const next = { ...n, updatedAt: Date.now() }
+      await db.put(STORES.notes, next)
+      setNotes((prev) => prev.map((x) => (x.id === n.id ? next : x)))
+    },
+    async deleteNote(id) {
+      await db.remove(STORES.notes, id)
+      setNotes((prev) => prev.filter((x) => x.id !== id))
     },
 
     async updateSettings(patch) {
