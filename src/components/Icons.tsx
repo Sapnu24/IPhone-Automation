@@ -124,6 +124,13 @@ export const IconDownload = ({ size, className }: P) => (
   </svg>
 )
 
+export const IconCamera = ({ size, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.2l1-1.6A1 1 0 0 1 8.5 4h7a1 1 0 0 1 .8.4L17.3 6h1.2A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5Z" />
+    <circle cx="12" cy="12.5" r="3.2" />
+  </svg>
+)
+
 export const IconUpload = ({ size, className }: P) => (
   <svg {...base(size)} className={className}>
     <path d="M12 20V10m0 0 4 4m-4-4-4 4" />

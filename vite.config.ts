@@ -36,6 +36,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // The OCR engine (~9MB) loads on demand — keep it out of the precache.
+        globIgnores: ['**/tesseract/**'],
         navigateFallbackDenylist: [/^\/api/],
       },
       devOptions: {

@@ -29,12 +29,18 @@ Apple entitlement, and are documented in [`docs/NATIVE_ROADMAP.md`](docs/NATIVE_
   - **Safe-to-spend** cashflow: income − spending − bills still due this month
 - **Reminders that actually fire on iOS** — export bills to a `.ics` calendar file
   with alarms; open it to add reliable due-date reminders to Apple Calendar
+- **Focus** — a configurable Pomodoro timer (work / short / long break) with a
+  session log, plus manual screen-time & habit self-tracking
+- **Insights** — spending by category, a 6-month trend, and a focus-time chart
+- **Receipt scanning** — snap or attach a photo and on-device OCR (tesseract.js,
+  self-hosted) auto-fills the amount and date. Runs entirely in your browser,
+  works offline, and nothing is ever uploaded
 - **Private & offline** — data is stored on-device (IndexedDB); works with no
   connection once installed
 - **Backup** — export / restore all data as a JSON file
 - **Light & dark** themes, multiple currencies
-- **Coming next:** Pomodoro focus timer + habit tracking (Phase B), spending charts
-  (Phase C), receipt photo capture with on-device OCR (Phase D)
+- **Coming next (native, needs a Mac):** device Screen Time, app-locking and
+  parental controls, plus App Store distribution — see `docs/NATIVE_ROADMAP.md`
 
 ## Tech
 
